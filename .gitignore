@@ -1,4 +1,4 @@
-/.idea/*
+/.idea/**
 test_main.http
 /venv/*
-*/__pycache__/*
+**/__pycache__/**
