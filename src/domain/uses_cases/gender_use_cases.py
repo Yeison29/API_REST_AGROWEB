@@ -8,12 +8,8 @@ user_repository = GenderRepositoryAdapter
 class GenderUseCase:
 
     @staticmethod
-    async def add_gender(gender: GenderModelIn):
-        gender_db = await user_repository.add_gender(gender)
-        print(gender_db)
-        response = {
-            **gender_db.dict()
-        }
+    async def add_gender(gender: GenderModelIn) -> GenderModelOut:
+        response = await user_repository.add_gender(gender)
         return response
 
     @staticmethod

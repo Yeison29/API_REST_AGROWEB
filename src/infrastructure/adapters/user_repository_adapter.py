@@ -22,7 +22,7 @@ class UserRepositoryAdapter(UserRepository):
             name_user=new_user.name_user,
             lastname_user=new_user.lastname_user,
             phone_user=new_user.phone_user,
-            email_user=new_user.id_document_user,
+            email_user=new_user.email_user,
             id_document_user=new_user.id_document_user,
             birthdate_user=new_user.birthdate_user,
             gender_id=new_user.gender_id

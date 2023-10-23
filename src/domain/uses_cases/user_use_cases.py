@@ -1,6 +1,8 @@
 from typing import List
-from src.domain.models.user_model import UserModelOut, UserModelIn, UserModelUpdate
+from src.domain.models.user_model import UserModelOut, UserModelIn
+from src.domain.models.authentication_model import AuthenticationModel
 from src.infrastructure.adapters.user_repository_adapter import UserRepositoryAdapter
+from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase
 
 user_repository = UserRepositoryAdapter
 
@@ -8,8 +10,10 @@ user_repository = UserRepositoryAdapter
 class UserUseCase:
 
     @staticmethod
-    async def add_user(user: UserModelIn):
+    async def add_user(user: UserModelIn, auth: AuthenticationModel) -> UserModelOut:
         user_db = await user_repository.add_user(user)
+        print(user_db)
+        auth_db = await AuthenticationUseCase.add_auth(user_db.id_user, user_db.email_user, auth)
         return user_db
 
     @staticmethod
