@@ -1,4 +1,5 @@
 from typing import List
+from fastapi import HTTPException
 from src.domain.models.authentication_model import AuthenticationModelOut, AuthenticationModelIn
 from src.domain.repositories.authentication_repository import AuthenticationRepository
 from src.infrastructure.adapters.data_sources.db_config import session
@@ -25,8 +26,24 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
         return auth_model_out
 
     @staticmethod
-    async def get_auth_by_id(auth: int) -> AuthenticationModelOut:
-        pass
+    async def get_auth_by_email(email_user: str) -> AuthenticationModelOut:
+        query = session.query(AuthenticationEntity).where(AuthenticationEntity.email_user_auth == email_user).first()
+        if not query:
+            session.commit()
+            session.close()
+            raise HTTPException(status_code=401, detail="Could not validate credentials",
+                                headers={"WWW-Authenticate": "Bearer"})
+        else:
+            auth_model_out = AuthenticationModelOut(
+                id_auth=query.id_auth,
+                auth_password=query.password_auth,
+                auth_email_user=query.email_user_auth,
+                auth_user_id=query.user_id,
+                auth_disabled=query.disabled_auth
+            )
+            session.commit()
+            session.close()
+            return auth_model_out
 
     @staticmethod
     async def update_auth(id_auth: int, auth: AuthenticationModelIn) -> AuthenticationModelIn:

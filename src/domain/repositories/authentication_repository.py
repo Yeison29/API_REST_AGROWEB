@@ -12,7 +12,7 @@ class AuthenticationRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def get_auth_by_id(auth: int) -> AuthenticationModelOut:
+    async def get_auth_by_email(email_user: str) -> AuthenticationModelOut:
         pass
 
     @staticmethod

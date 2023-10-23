@@ -1,6 +1,7 @@
 from typing import List
 from src.domain.models.gender_model import GenderModelOut
 from src.domain.models.user_model import UserModelOut
+from src.domain.models.token_model import TokenModel
 from fastapi import APIRouter
 from src.infrastructure.contrrollers.api_rest import ApiRest
 
@@ -12,7 +13,7 @@ class ApiRouter:
         self._setup_routes()
 
     def _setup_routes(self):
-        self.router.get("/", response_model=dict)(ApiRest.root)
+        self.router.post("/token", status_code=200, response_model=TokenModel)(ApiRest.token)
         self.router.get("/get-all-users", status_code=200, response_model=List[UserModelOut])(ApiRest.get_all_users)
         self.router.post("/api/create-user", status_code=201, response_model=UserModelOut)(ApiRest.add_user)
         self.router.get("/api/get-user-by-id", status_code=200, response_model=UserModelOut)(ApiRest.get_user_by_id)

@@ -1,4 +1,3 @@
-from src.domain.models.gender_model import GenderModelOut
 from pydantic import Field
 from datetime import date
 from pydantic import BaseModel

@@ -6,9 +6,12 @@ class AuthenticationModel(BaseModel):
     auth_password: str
 
 
-class AuthenticationModelIn(AuthenticationModel):
+class AuthenticationModelReceive(AuthenticationModel):
     auth_email_user: str
     auth_user_id: int
+
+
+class AuthenticationModelIn(AuthenticationModelReceive):
     auth_disabled: bool
 
 
@@ -21,4 +24,3 @@ class AuthenticationModelUpdate(AuthenticationModelIn):
     auth_password: Optional[str] = None
     auth_disabled: Optional[bool] = None
     auth_user_id: int
-

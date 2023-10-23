@@ -9,7 +9,7 @@ class AuthenticationEntity(Base):
     __tablename__ = 'authentication_agroweb'
     id_auth = Column(Integer, primary_key=True, autoincrement=True)
     email_user_auth = Column(String(319), unique=True, nullable=False)
-    password_auth = Column(String(256), nullable=False)
+    password_auth = Column(String, nullable=False)
     disabled_auth = Column(Boolean, nullable=False)
     user_id = Column(Integer, ForeignKey('user_agroweb.id_user'))
 

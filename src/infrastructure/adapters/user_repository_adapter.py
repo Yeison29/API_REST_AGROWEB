@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from src.domain.models.user_model import UserModelIn, UserModelOut
 from src.domain.repositories.user_repository import UserRepository
 from src.infrastructure.adapters.data_sources.db_config import session
-from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (UserEntity, GenderEntity)
+from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (UserEntity)
 
 
 class UserRepositoryAdapter(UserRepository):
