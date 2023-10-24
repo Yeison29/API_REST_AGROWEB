@@ -6,7 +6,7 @@ from src.domain.models.authentication_model import AuthenticationModel
 from src.domain.uses_cases.user_use_cases import UserUseCase
 from src.domain.uses_cases.gender_use_cases import GenderUseCase
 from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
 user_use_case = UserUseCase()
@@ -21,37 +21,36 @@ class ApiRest:
         return response
 
     @staticmethod
-    async def add_user(user: UserModelIn, auth: AuthenticationModel):
-        response = await user_use_case.add_user(user, auth)
+    async def add_user(user: UserModelIn, auth: AuthenticationModel, token: str = Depends(oauth2_scheme)):
+        response = await user_use_case.add_user(user, auth, token)
         return response
 
     @staticmethod
     async def get_all_users(token: str = Depends(oauth2_scheme)):
-        print(token)
-        response = await user_use_case.get_all_users()
+        response = await user_use_case.get_all_users(token)
         return response
 
     @staticmethod
-    async def get_user_by_id(id_user: int):
-        response = await user_use_case.get_user_by_id(id_user)
+    async def get_user_by_id(id_user: int,  token: str = Depends(oauth2_scheme)):
+        response = await user_use_case.get_user_by_id(id_user, token)
         return response
 
     @staticmethod
-    async def update_user(id_user: int, user: UserModelIn):
-        response = await user_use_case.update_user(id_user, user)
+    async def update_user(id_user: int, user: UserModelIn, token: str = Depends(oauth2_scheme)):
+        response = await user_use_case.update_user(id_user, user, token)
         return response
 
     @staticmethod
-    async def delete_user(id_user: int):
-        response = await user_use_case.delete_user(id_user)
+    async def delete_user(id_user: int, token: str = Depends(oauth2_scheme)):
+        response = await user_use_case.delete_user(id_user, token)
         return response
 
     @staticmethod
-    async def add_gender(gender: GenderModelIn):
-        response = await gender_use_case.add_gender(gender)
+    async def add_gender(gender: GenderModelIn,  token: str = Depends(oauth2_scheme)):
+        response = await gender_use_case.add_gender(gender, token)
         return response
 
     @staticmethod
-    async def get_all_genders():
-        response = await gender_use_case.get_all_genders()
+    async def get_all_genders(token: str = Depends(oauth2_scheme)):
+        response = await gender_use_case.get_all_genders(token)
         return response

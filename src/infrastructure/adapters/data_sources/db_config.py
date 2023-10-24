@@ -12,6 +12,8 @@ database = os.getenv('DB_NAME')
 user = os.getenv('USER_NAME')
 schema = os.getenv("SCHEMA", 'public')
 password = os.getenv('PASSWORD')
+secret_key = os.getenv('SECRET_KEY')
+algorithm = os.getenv('ALGORITHM')
 
 DATABASE_URL = f"postgresql+psycopg2://{user}:{password}@{host}/{database}"
 

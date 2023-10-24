@@ -1,6 +1,8 @@
-from typing import List
+from typing import List, Union
+from datetime import timedelta
 from abc import ABC, abstractmethod
-from src.domain.models.authentication_model import AuthenticationModelIn, AuthenticationModelOut, AuthenticationModelUpdate
+from src.domain.models.authentication_model import AuthenticationModelIn, AuthenticationModelOut
+from src.domain.models.token_model import TokenModel
 
 
 class AuthenticationRepository(ABC):
@@ -27,5 +29,15 @@ class AuthenticationRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def auth_user(id_auth: int) -> None:
+    async def delete_auth(id_auth: int) -> None:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    async def create_token(data: dict, time_expire: Union[timedelta, None] = None) -> str:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    async def get_user_current(token: TokenModel) -> bool:
         pass
