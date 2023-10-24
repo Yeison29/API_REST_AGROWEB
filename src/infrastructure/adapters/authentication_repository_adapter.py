@@ -87,6 +87,6 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
                                 headers={"WWW-Authenticate": "Bearer"})
         auth = await AuthenticationRepositoryAdapter.get_auth_by_email(user_email)
         if not auth:
-            raise HTTPException(status_code=401, detail="Could not validate credentials",
+            raise HTTPException(status_code=400, detail="User not found",
                                 headers={"WWW-Authenticate": "Bearer"})
         return True
