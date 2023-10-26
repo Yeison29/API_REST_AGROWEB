@@ -11,6 +11,7 @@ class UserModelIn(BaseModel):
     phone_user: str
     id_document_user: str
     birthdate_user: date = Field(None, description="Fecha de nacimiento (YYYY-MM-DD)")
+    type_document_id: int
     gender_id: int
 
 

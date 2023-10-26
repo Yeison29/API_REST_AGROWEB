@@ -1,10 +1,9 @@
 from typing import List, Union
 from fastapi import HTTPException
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from src.domain.models.authentication_model import AuthenticationModelOut, AuthenticationModelIn
-from src.domain.models.token_model import TokenModel
 from src.domain.repositories.authentication_repository import AuthenticationRepository
 from src.infrastructure.adapters.data_sources.db_config import session, algorithm, secret_key
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (AuthenticationEntity)

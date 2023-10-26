@@ -1,8 +1,9 @@
 from typing import List
-from src.domain.models.gender_model import GenderModelIn, GenderModelOut, GenderModelUpdate
+from fastapi import HTTPException
+from src.domain.models.gender_model import GenderModelIn, GenderModelOut
 from src.domain.repositories.gender_repository import GenderRepository
 from src.infrastructure.adapters.data_sources.db_config import session
-from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (UserEntity, GenderEntity)
+from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (GenderEntity)
 
 
 class GenderRepositoryAdapter(GenderRepository):
@@ -22,19 +23,42 @@ class GenderRepositoryAdapter(GenderRepository):
         return gender_model_out
 
     @staticmethod
-    async def get_gender_by_id(gender_id: int) -> GenderModelIn:
-        query = UserEntity.user_table.select(UserEntity.user_table.c.id_user == user_id)
-        return await database.fetch_one(query=query)
+    async def get_gender_by_id(id_gender: int) -> GenderModelOut:
+        query = session.query(GenderEntity).where(GenderEntity.id_gender == id_gender).first()
+        if not query:
+            session.commit()
+            session.close()
+            raise HTTPException(status_code=404, detail="Gender not found")
+        else:
+            gender_model_out = GenderModelOut(
+                id_gender=query.id_gender,
+                name_gender=query.name_gender,
+                code_gender=query.code_gender
+            )
+            session.commit()
+            session.close()
+            return gender_model_out
 
     @staticmethod
-    async def update_gender(gender_id: int, gender: GenderModelIn) -> GenderModelIn:
-        query = (
-            UserEntity.user_table
-            .update()
-            .where(UserEntity.user_table.c.id_user == user_id)
-            .values(**user.dict())
+    async def update_gender(id_gender: int, gender: GenderModelIn) -> GenderModelOut:
+        query = session.query(GenderEntity).where(GenderEntity.id_gender == id_gender).first()
+        if not query:
+            session.commit()
+            session.close()
+            raise HTTPException(status_code=404, detail="Gender not found")
+        else:
+            if query:
+                for key, value in gender.dict().items():
+                    setattr(query, key, value)
+
+        gender_model_out = GenderModelOut(
+            id_gender=id_gender,
+            name_gender=gender.name_gender,
+            code_gender=gender.code_gender
         )
-        return await database.execute(query=query)
+        session.commit()
+        session.close()
+        return gender_model_out
 
     @staticmethod
     async def get_all_genders() -> List[GenderModelOut]:
@@ -52,6 +76,15 @@ class GenderRepositoryAdapter(GenderRepository):
         return genders_model_out_list
 
     @staticmethod
-    async def delete_gender(user_id: int) -> None:
-        query = UserEntity.user_table.delete().where(UserEntity.user_table.c.id == id)
-        return await database.execute(query=query)
+    async def delete_gender(id_gender: int) -> None:
+        query = session.query(GenderEntity).where(GenderEntity.id_gender == id_gender).first()
+        if not query:
+            session.commit()
+            session.close()
+            raise HTTPException(status_code=404, detail="Gender not found")
+        else:
+            if query:
+                session.delete(query)
+            session.commit()
+            session.close()
+        return None

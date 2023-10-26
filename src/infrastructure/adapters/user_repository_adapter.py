@@ -12,7 +12,8 @@ class UserRepositoryAdapter(UserRepository):
     async def add_user(user: UserModelIn) -> UserModelOut:
         new_user = UserEntity(name_user=user.name_user, lastname_user=user.lastname_user, email_user=user.email_user,
                               id_document_user=user.id_document_user, birthdate_user=user.birthdate_user,
-                              phone_user=user.phone_user, gender_id=user.gender_id)
+                              phone_user=user.phone_user, type_document_id=user.type_document_id,
+                              gender_id=user.gender_id)
         session.add(new_user)
         session.commit()
         session.refresh(new_user)
@@ -25,6 +26,7 @@ class UserRepositoryAdapter(UserRepository):
             email_user=new_user.email_user,
             id_document_user=new_user.id_document_user,
             birthdate_user=new_user.birthdate_user,
+            type_document_id=new_user.type_document_id,
             gender_id=new_user.gender_id
         )
         return user_model_out
@@ -32,7 +34,6 @@ class UserRepositoryAdapter(UserRepository):
     @staticmethod
     async def get_user_by_id(id_user: int) -> UserModelOut:
         query = session.query(UserEntity).where(UserEntity.id_user == id_user).first()
-        print(query)
         if not query:
             session.commit()
             session.close()
@@ -46,6 +47,7 @@ class UserRepositoryAdapter(UserRepository):
                 email_user=query.id_document_user,
                 id_document_user=query.id_document_user,
                 birthdate_user=query.birthdate_user,
+                type_document_id=query.type_document_id,
                 gender_id=query.gender_id
             )
             session.commit()
@@ -72,6 +74,7 @@ class UserRepositoryAdapter(UserRepository):
             email_user=user.id_document_user,
             id_document_user=user.id_document_user,
             birthdate_user=user.birthdate_user,
+            type_document_id=user.type_document_id,
             gender_id=user.gender_id
         )
         session.commit()
@@ -90,6 +93,7 @@ class UserRepositoryAdapter(UserRepository):
                 email_user=q.id_document_user,
                 id_document_user=q.id_document_user,
                 birthdate_user=q.birthdate_user,
+                type_document_id=q.type_document_id,
                 gender_id=q.gender_id
             )
             for q in query

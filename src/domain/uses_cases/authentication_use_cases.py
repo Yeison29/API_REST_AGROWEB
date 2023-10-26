@@ -1,6 +1,6 @@
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from datetime import datetime, timedelta
+from datetime import timedelta
 from src.domain.models.authentication_model import (AuthenticationModel, AuthenticationModelIn, AuthenticationModelOut,
                                                     AuthenticationModelReceive)
 from src.infrastructure.adapters.authentication_repository_adapter import AuthenticationRepositoryAdapter
@@ -16,14 +16,12 @@ class AuthenticationUseCase:
     @staticmethod
     async def add_auth(user_id: int, auth_email_user: str, auth: AuthenticationModel) -> AuthenticationModelOut:
         password_hashed = password_context.hash(auth.auth_password)
-        print(password_hashed)
         auth_in = AuthenticationModelIn(
             auth_password=password_hashed,
             auth_email_user=auth_email_user,
             auth_user_id=user_id,
             auth_disabled=False
         )
-        print(auth_in)
         response = await auth_repository.add_auth(auth_in)
         return response
 
@@ -44,7 +42,6 @@ class AuthenticationUseCase:
     @staticmethod
     async def form_data_to_authenticate_model_receive(form_data: OAuth2PasswordRequestForm = Depends()) -> (
             AuthenticationModelReceive):
-        print(form_data)
         auth_model_receive = AuthenticationModelReceive(
             auth_email_user=form_data.username,
             auth_password=form_data.password

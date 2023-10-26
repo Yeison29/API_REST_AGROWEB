@@ -11,12 +11,10 @@ user_repository = UserRepositoryAdapter
 class UserUseCase:
 
     @staticmethod
-    async def add_user(user: UserModelIn, auth: AuthenticationModel, token: str) -> UserModelOut:
-        validate_token = await AuthenticationUseCase.get_user_current(token)
-        if validate_token is True:
-            user_db = await user_repository.add_user(user)
-            await AuthenticationUseCase.add_auth(user_db.id_user, user_db.email_user, auth)
-            return user_db
+    async def add_user(user: UserModelIn, auth: AuthenticationModel) -> UserModelOut:
+        user_db = await user_repository.add_user(user)
+        await AuthenticationUseCase.add_auth(user_db.id_user, user_db.email_user, auth)
+        return user_db
 
     @staticmethod
     async def get_user_by_id(id_user: int, token: str) -> UserModelOut:
