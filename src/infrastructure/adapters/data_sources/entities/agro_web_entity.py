@@ -25,6 +25,7 @@ class UserEntity(Base):
     birthdate_user = Column(Date)
     type_document_id = Column(Integer, ForeignKey('type_document_agroweb.id_type_document'))
     gender_id = Column(Integer, ForeignKey('gender_agroweb.id_gender'))
+    municipality_id = Column(Integer, ForeignKey('municipality_agroweb.id_municipality'))
 
 
 class GenderEntity(Base):
@@ -41,9 +42,38 @@ class TypeDocumentEntity(Base):
     code_type_document = Column(String(3), nullable=False, unique=True)
 
 
+class MunicipalityEntity(Base):
+    __tablename__ = 'municipality_agroweb'
+    id_municipality = Column(Integer, primary_key=True, autoincrement=True)
+    name_municipality = Column(String(50), nullable=False)
+    code_municipality = Column(String(3), nullable=False, unique=True)
+    department_id = Column(Integer, ForeignKey('department_agroweb.id_department'))
+
+
+class DepartmentEntity(Base):
+    __tablename__ = 'department_agroweb'
+    id_department = Column(Integer, primary_key=True, autoincrement=True)
+    name_department = Column(String(50), nullable=False)
+    code_department = Column(String(3), nullable=False, unique=True)
+    country_id = Column(Integer, ForeignKey('country_agroweb.id_country'))
+
+
+class CountryEntity(Base):
+    __tablename__ = 'country_agroweb'
+    id_country = Column(Integer, primary_key=True, autoincrement=True)
+    name_country = Column(String(50), nullable=False)
+    code_country = Column(String(3), nullable=False, unique=True)
+
+
 AuthenticationEntity.user = relationship(UserEntity, back_populates='auth')
 UserEntity.auth = relationship(AuthenticationEntity, back_populates='user')
 UserEntity.gender = relationship(GenderEntity, back_populates='users')
 GenderEntity.users = relationship(UserEntity, back_populates='gender')
 TypeDocumentEntity.users = relationship(UserEntity, back_populates='typeDocument')
 UserEntity.typeDocument = relationship(TypeDocumentEntity, back_populates='users')
+MunicipalityEntity.user = relationship(UserEntity, back_populates='municipality')
+UserEntity.municipality = relationship(MunicipalityEntity, back_populates='user')
+DepartmentEntity.municipality = relationship(MunicipalityEntity, back_populates='department')
+MunicipalityEntity.department = relationship(DepartmentEntity, back_populates='municipality')
+CountryEntity.department = relationship(DepartmentEntity, back_populates='country')
+DepartmentEntity.country = relationship(CountryEntity, back_populates='department')

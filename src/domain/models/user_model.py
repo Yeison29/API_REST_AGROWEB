@@ -13,6 +13,7 @@ class UserModelIn(BaseModel):
     birthdate_user: date = Field(None, description="Fecha de nacimiento (YYYY-MM-DD)")
     type_document_id: int
     gender_id: int
+    municipality_id: int
 
 
 class UserModelOut(UserModelIn):

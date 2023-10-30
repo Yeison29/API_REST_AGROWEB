@@ -38,5 +38,5 @@ class GenderUseCase:
     async def delete_gender(id_gender: int, token: str) -> None:
         validate_token = await AuthenticationUseCase.get_user_current(token)
         if validate_token is True:
-            delete_user = await gender_repository.delete_gender(id_gender)
-            return delete_user
+            delete_gender = await gender_repository.delete_gender(id_gender)
+            return delete_gender

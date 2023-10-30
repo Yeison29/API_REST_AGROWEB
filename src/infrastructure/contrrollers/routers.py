@@ -3,6 +3,9 @@ from src.domain.models.gender_model import GenderModelOut
 from src.domain.models.user_model import UserModelOut
 from src.domain.models.token_model import TokenModel
 from src.domain.models.type_document_model import TypeDocumentModelOut
+from src.domain.models.country_model import CountryModelOut
+from src.domain.models.department_model import DepartmentModelOut
+from src.domain.models.municipality_model import MunicipalityModelOut
 from fastapi import APIRouter
 from src.infrastructure.contrrollers.api_rest import ApiRest
 
@@ -27,13 +30,43 @@ class ApiRouter:
             ApiRest.get_gender_by_id)
         self.router.put("/api/update-gender", status_code=200, response_model=GenderModelOut)(ApiRest.update_gender)
         self.router.delete("/api/delete-gender", status_code=204, response_model=None)(ApiRest.delete_gender)
-        self.router.post("/api/create-type-document", status_code=201, response_model=GenderModelOut)(
+        self.router.post("/api/create-type-document", status_code=201, response_model=TypeDocumentModelOut)(
             ApiRest.add_type_document)
         self.router.get("/api/get-all-type-documents", status_code=200, response_model=List[TypeDocumentModelOut])(
             ApiRest.get_all_type_documents)
-        self.router.get("/api/get-type-document-by-id", status_code=200, response_model=GenderModelOut)(
+        self.router.get("/api/get-type-document-by-id", status_code=200, response_model=TypeDocumentModelOut)(
             ApiRest.get_type_document_by_id)
         self.router.put("/api/update-type-document", status_code=200, response_model=TypeDocumentModelOut)(
             ApiRest.update_type_document)
         self.router.delete("/api/delete-type-document", status_code=204, response_model=None)(
             ApiRest.delete_type_document)
+        self.router.post("/api/create-country", status_code=201, response_model=CountryModelOut)(
+            ApiRest.add_country)
+        self.router.get("/api/get-all-countries", status_code=200, response_model=List[CountryModelOut])(
+            ApiRest.get_all_countries)
+        self.router.get("/api/get-country", status_code=200, response_model=CountryModelOut)(
+            ApiRest.get_country_by_id)
+        self.router.put("/api/update-country", status_code=200, response_model=CountryModelOut)(
+            ApiRest.update_country)
+        self.router.delete("/api/delete-country", status_code=204, response_model=None)(
+            ApiRest.delete_country)
+        self.router.post("/api/create-department", status_code=201, response_model=DepartmentModelOut)(
+            ApiRest.add_department)
+        self.router.get("/api/get-all-departments", status_code=200, response_model=List[DepartmentModelOut])(
+            ApiRest.get_all_departments)
+        self.router.get("/api/get-department", status_code=200, response_model=DepartmentModelOut)(
+            ApiRest.get_department_by_id)
+        self.router.put("/api/update-department", status_code=200, response_model=DepartmentModelOut)(
+            ApiRest.update_department)
+        self.router.delete("/api/delete-department", status_code=204, response_model=None)(
+            ApiRest.delete_department)
+        self.router.post("/api/create-municipality", status_code=201, response_model=MunicipalityModelOut)(
+            ApiRest.add_municipality)
+        self.router.get("/api/get-all-municipalities", status_code=200, response_model=List[MunicipalityModelOut])(
+            ApiRest.get_all_municipalities)
+        self.router.get("/api/get-municipality", status_code=200, response_model=MunicipalityModelOut)(
+            ApiRest.get_municipality_by_id)
+        self.router.put("/api/update-municipality", status_code=200, response_model=MunicipalityModelOut)(
+            ApiRest.update_municipality)
+        self.router.delete("/api/delete-municipality", status_code=204, response_model=None)(
+            ApiRest.delete_municipality)
