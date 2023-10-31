@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import HTTPException
-from src.domain.models.type_document_model import TypeDocumentModelOut, TypeDocumentModelIn
-from src.domain.repositories.type_document_repository import TypeDocumentRepository
+from src.domain.repositories.type_document_repository import (TypeDocumentRepository, TypeDocumentModelOut,
+                                                              TypeDocumentModelIn)
 from src.infrastructure.adapters.data_sources.db_config import session
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (TypeDocumentEntity)
 

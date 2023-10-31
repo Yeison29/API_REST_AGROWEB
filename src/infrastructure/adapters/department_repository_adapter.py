@@ -1,7 +1,6 @@
 from typing import List
 from fastapi import HTTPException
-from src.domain.models.department_model import DepartmentModelOut, DepartmentModelIn
-from src.domain.repositories.department_repository import DepartmentRepository
+from src.domain.repositories.department_repository import DepartmentRepository, DepartmentModelOut, DepartmentModelIn
 from src.infrastructure.adapters.data_sources.db_config import session
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (DepartmentEntity)
 

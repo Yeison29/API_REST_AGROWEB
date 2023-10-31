@@ -1,6 +1,6 @@
 from typing import List
-from src.domain.models.department_model import DepartmentModelOut, DepartmentModelIn
-from src.infrastructure.adapters.department_repository_adapter import DepartmentRepositoryAdapter
+from src.infrastructure.adapters.department_repository_adapter import (DepartmentRepositoryAdapter, DepartmentModelOut,
+                                                                       DepartmentModelIn)
 from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase
 
 department_repository = DepartmentRepositoryAdapter

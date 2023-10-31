@@ -1,6 +1,6 @@
 from typing import List
-from src.domain.models.municipality_model import MunicipalityModelOut, MunicipalityModelIn
-from src.infrastructure.adapters.municipality_repository_adapter import MunicipalityRepositoryAdapter
+from src.infrastructure.adapters.municipality_repository_adapter import (MunicipalityRepositoryAdapter,
+                                                                         MunicipalityModelOut, MunicipalityModelIn)
 from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase
 
 municipality_repository = MunicipalityRepositoryAdapter

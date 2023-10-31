@@ -1,12 +1,14 @@
+from fastapi import APIRouter
 from typing import List
 from src.domain.uses_cases.gender_use_cases import GenderModelOut
 from src.domain.uses_cases.user_use_cases import UserModelOut
-from src.domain.uses_cases.user_use_cases import TokenModel
+from src.domain.uses_cases.authentication_use_cases import TokenModel
 from src.domain.uses_cases.type_document_use_cases import TypeDocumentModelOut
-from src.domain.uses_cases.country_use_case import CountryModelOut
-from src.domain.uses_cases.department_use_case import DepartmentModelOut
-from src.domain.uses_cases.municipality_use_case import MunicipalityModelOut
-from fastapi import APIRouter
+from src.domain.uses_cases.country_use_cases import CountryModelOut
+from src.domain.uses_cases.department_use_cases import DepartmentModelOut
+from src.domain.uses_cases.municipality_use_cases import MunicipalityModelOut
+from src.domain.uses_cases.haverst_use_cases import HarvestModelOut
+from src.domain.uses_cases.crop_use_cases import CropModelOut
 from src.infrastructure.contrrollers.api_rest import ApiRest
 
 
@@ -70,3 +72,23 @@ class ApiRouter:
             ApiRest.update_municipality)
         self.router.delete("/api/delete-municipality", status_code=204, response_model=None)(
             ApiRest.delete_municipality)
+        self.router.post("/api/create-harvest", status_code=201, response_model=HarvestModelOut)(
+            ApiRest.add_harvest)
+        self.router.get("/api/get-all-harvests", status_code=200, response_model=List[HarvestModelOut])(
+            ApiRest.get_all_harvests)
+        self.router.get("/api/get-harvest", status_code=200, response_model=HarvestModelOut)(
+            ApiRest.get_harvest_by_id)
+        self.router.put("/api/update-harvest", status_code=200, response_model=HarvestModelOut)(
+            ApiRest.update_harvest)
+        self.router.delete("/api/delete-harvest", status_code=204, response_model=None)(
+            ApiRest.delete_harvest)
+        self.router.post("/api/create-crop", status_code=201, response_model=CropModelOut)(
+            ApiRest.add_crop)
+        self.router.get("/api/get-all-crops", status_code=200, response_model=List[CropModelOut])(
+            ApiRest.get_all_crops)
+        self.router.get("/api/get-crop", status_code=200, response_model=CropModelOut)(
+            ApiRest.get_crop_by_id)
+        self.router.put("/api/update-crop", status_code=200, response_model=CropModelOut)(
+            ApiRest.update_crop)
+        self.router.delete("/api/delete-crop", status_code=204, response_model=None)(
+            ApiRest.delete_crop)

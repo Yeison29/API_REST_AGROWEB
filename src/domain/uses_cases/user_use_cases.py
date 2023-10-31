@@ -1,8 +1,6 @@
 from typing import List
-from src.domain.models.user_model import UserModelOut, UserModelIn
 from src.domain.models.authentication_model import AuthenticationModel
-from src.domain.models.token_model import TokenModel
-from src.infrastructure.adapters.user_repository_adapter import UserRepositoryAdapter
+from src.infrastructure.adapters.user_repository_adapter import UserRepositoryAdapter, UserModelOut, UserModelIn
 from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase
 
 user_repository = UserRepositoryAdapter

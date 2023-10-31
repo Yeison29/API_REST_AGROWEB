@@ -1,6 +1,6 @@
 from typing import List
-from src.domain.models.country_model import CountryModelOut, CountryModelIn
-from src.infrastructure.adapters.country_repository_adapter import CountryRepositoryAdapter
+from src.infrastructure.adapters.country_repository_adapter import (CountryRepositoryAdapter, CountryModelOut,
+                                                                    CountryModelIn)
 from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase
 
 country_repository = CountryRepositoryAdapter

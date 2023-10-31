@@ -1,6 +1,6 @@
 from typing import List
-from src.domain.models.type_document_model import TypeDocumentModelOut, TypeDocumentModelIn
-from src.infrastructure.adapters.type_document_repository_adapter import TypeDocumentRepositoryAdapter
+from src.infrastructure.adapters.type_document_repository_adapter import (TypeDocumentRepositoryAdapter,
+                                                                          TypeDocumentModelOut, TypeDocumentModelIn)
 from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase
 
 type_document_repository = TypeDocumentRepositoryAdapter

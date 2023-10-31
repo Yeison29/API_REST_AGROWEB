@@ -1,7 +1,6 @@
 from typing import List
 from fastapi import HTTPException
-from src.domain.models.country_model import CountryModelIn, CountryModelOut
-from src.domain.repositories.country_repository import CountryRepository
+from src.domain.repositories.country_repository import CountryRepository, CountryModelIn, CountryModelOut
 from src.infrastructure.adapters.data_sources.db_config import session
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (CountryEntity)
 

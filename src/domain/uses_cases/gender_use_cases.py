@@ -1,6 +1,6 @@
 from typing import List
-from src.domain.models.gender_model import GenderModelOut, GenderModelIn
-from src.infrastructure.adapters.gender_repository_adapter import GenderRepositoryAdapter
+from src.infrastructure.adapters.gender_repository_adapter import (GenderRepositoryAdapter, GenderModelOut,
+                                                                   GenderModelIn)
 from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase
 
 gender_repository = GenderRepositoryAdapter

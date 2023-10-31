@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import HTTPException
-from src.domain.models.municipality_model import MunicipalityModelOut, MunicipalityModelIn
-from src.domain.repositories.municipality_repository import MunicipalityRepository
+from src.domain.repositories.municipality_repository import (MunicipalityRepository, MunicipalityModelOut,
+                                                             MunicipalityModelIn)
 from src.infrastructure.adapters.data_sources.db_config import session
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (MunicipalityEntity)
 

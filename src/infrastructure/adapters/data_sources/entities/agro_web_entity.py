@@ -1,4 +1,4 @@
-from sqlalchemy import (Column, Integer, String, Date, MetaData, ForeignKey, Boolean)
+from sqlalchemy import (Column, Float, Integer, String, Date, MetaData, ForeignKey, Boolean)
 from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
@@ -22,7 +22,7 @@ class UserEntity(Base):
     email_user = Column(String(319), unique=True, nullable=False)
     phone_user = Column(String(10), unique=True, nullable=False)
     id_document_user = Column(String(10), unique=True, nullable=False)
-    birthdate_user = Column(Date)
+    birthdate_user = Column(Date, nullable=False)
     type_document_id = Column(Integer, ForeignKey('type_document_agroweb.id_type_document'))
     gender_id = Column(Integer, ForeignKey('gender_agroweb.id_gender'))
     municipality_id = Column(Integer, ForeignKey('municipality_agroweb.id_municipality'))
@@ -65,6 +65,24 @@ class CountryEntity(Base):
     code_country = Column(String(3), nullable=False, unique=True)
 
 
+class HarvestEntity(Base):
+    __tablename__ = 'harvest_agroweb'
+    id_harvest = Column(Integer, primary_key=True, autoincrement=True)
+    name_harvest = Column(String(50), nullable=False)
+    code_harvest = Column(String(3), nullable=False, unique=True)
+
+
+class CropEntity(Base):
+    __tablename__ = 'crop_agroweb'
+    id_crop = Column(Integer, primary_key=True, autoincrement=True)
+    hectares = Column(Float, nullable=False)
+    seed_time = Column(Date, nullable=False)
+    approximate_durability_date = Column(Date, nullable=False)
+    approximate_weeks_crop_durability = Column(Integer, nullable=False)
+    harvest_id = Column(Integer, ForeignKey('harvest_agroweb.id_harvest'))
+    user_id = Column(Integer, ForeignKey('user_agroweb.id_user'))
+
+
 AuthenticationEntity.user = relationship(UserEntity, back_populates='auth')
 UserEntity.auth = relationship(AuthenticationEntity, back_populates='user')
 UserEntity.gender = relationship(GenderEntity, back_populates='users')
@@ -77,3 +95,7 @@ DepartmentEntity.municipality = relationship(MunicipalityEntity, back_populates=
 MunicipalityEntity.department = relationship(DepartmentEntity, back_populates='municipality')
 CountryEntity.department = relationship(DepartmentEntity, back_populates='country')
 DepartmentEntity.country = relationship(CountryEntity, back_populates='department')
+HarvestEntity.crop = relationship(CropEntity, back_populates='harvest')
+CropEntity.harvest = relationship(HarvestEntity, back_populates='crop')
+CropEntity.user = relationship(UserEntity, back_populates='crop')
+UserEntity.crop = relationship(CropEntity, back_populates='user')

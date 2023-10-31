@@ -1,7 +1,6 @@
 from typing import List
 from fastapi import HTTPException
-from src.domain.models.gender_model import GenderModelIn, GenderModelOut
-from src.domain.repositories.gender_repository import GenderRepository
+from src.domain.repositories.gender_repository import GenderRepository, GenderModelIn, GenderModelOut
 from src.infrastructure.adapters.data_sources.db_config import session
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (GenderEntity)
 

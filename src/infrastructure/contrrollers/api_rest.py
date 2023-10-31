@@ -1,18 +1,13 @@
 from fastapi import Depends
-from src.domain.uses_cases.user_use_cases import UserModelIn
-from src.domain.uses_cases.gender_use_cases import GenderModelIn
-from src.domain.uses_cases.type_document_use_cases import TypeDocumentModelIn
-from src.domain.uses_cases.country_use_case import CountryModelIn
-from src.domain.uses_cases.department_use_case import DepartmentModelIn
-from src.domain.uses_cases.municipality_use_case import MunicipalityModelIn
-from src.domain.uses_cases.user_use_cases import AuthenticationModel
-from src.domain.uses_cases.user_use_cases import UserUseCase
-from src.domain.uses_cases.gender_use_cases import GenderUseCase
-from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase
-from src.domain.uses_cases.type_document_use_cases import TypeDocumentUseCase
-from src.domain.uses_cases.country_use_case import CountryUseCase
-from src.domain.uses_cases.municipality_use_case import MunicipalityUseCase
-from src.domain.uses_cases.department_use_case import DepartmentUseCase
+from src.domain.uses_cases.user_use_cases import UserModelIn, UserUseCase
+from src.domain.uses_cases.gender_use_cases import GenderModelIn, GenderUseCase
+from src.domain.uses_cases.type_document_use_cases import TypeDocumentModelIn, TypeDocumentUseCase
+from src.domain.uses_cases.country_use_cases import CountryModelIn, CountryUseCase
+from src.domain.uses_cases.department_use_cases import DepartmentModelIn, DepartmentUseCase
+from src.domain.uses_cases.municipality_use_cases import MunicipalityModelIn, MunicipalityUseCase
+from src.domain.uses_cases.user_use_cases import AuthenticationModel, AuthenticationUseCase
+from src.domain.uses_cases.crop_use_cases import CropModelIn, CropUseCase
+from src.domain.uses_cases.haverst_use_cases import HarvestModelIn, HarvestUseCase
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
@@ -22,6 +17,8 @@ type_document_use_case = TypeDocumentUseCase()
 country_use_case = CountryUseCase()
 department_use_case = DepartmentUseCase()
 municipality_use_case = MunicipalityUseCase()
+crop_use_case = CropUseCase()
+harvest_use_case = HarvestUseCase()
 
 
 class ApiRest:
@@ -181,4 +178,54 @@ class ApiRest:
     @staticmethod
     async def delete_municipality(id_municipality: int, token: str = Depends(oauth2_scheme)):
         response = await municipality_use_case.delete_municipality(id_municipality, token)
+        return response
+
+    @staticmethod
+    async def add_crop(crop: CropModelIn, token: str = Depends(oauth2_scheme)):
+        response = await crop_use_case.add_crop(crop, token)
+        return response
+
+    @staticmethod
+    async def get_all_crops(token: str = Depends(oauth2_scheme)):
+        response = await crop_use_case.get_all_crops(token)
+        return response
+
+    @staticmethod
+    async def get_crop_by_id(id_crop: int, token: str = Depends(oauth2_scheme)):
+        response = await crop_use_case.get_crop_by_id(id_crop, token)
+        return response
+
+    @staticmethod
+    async def update_crop(id_crop: int, crop: CropModelIn, token: str = Depends(oauth2_scheme)):
+        response = await crop_use_case.update_crop(id_crop, crop, token)
+        return response
+
+    @staticmethod
+    async def delete_crop(id_crop: int, token: str = Depends(oauth2_scheme)):
+        response = await crop_use_case.delete_crop(id_crop, token)
+        return response
+
+    @staticmethod
+    async def add_harvest(harvest: HarvestModelIn, token: str = Depends(oauth2_scheme)):
+        response = await harvest_use_case.add_harvest(harvest, token)
+        return response
+
+    @staticmethod
+    async def get_all_harvests(token: str = Depends(oauth2_scheme)):
+        response = await harvest_use_case.get_all_harvests(token)
+        return response
+
+    @staticmethod
+    async def get_harvest_by_id(id_harvest: int, token: str = Depends(oauth2_scheme)):
+        response = await harvest_use_case.get_harvest_by_id(id_harvest, token)
+        return response
+
+    @staticmethod
+    async def update_harvest(id_harvest: int, harvest: HarvestModelIn, token: str = Depends(oauth2_scheme)):
+        response = await harvest_use_case.update_harvest(id_harvest, harvest, token)
+        return response
+
+    @staticmethod
+    async def delete_harvest(id_harvest: int, token: str = Depends(oauth2_scheme)):
+        response = await harvest_use_case.delete_harvest(id_harvest, token)
         return response
