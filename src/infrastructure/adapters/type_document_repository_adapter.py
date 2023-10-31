@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from src.domain.repositories.type_document_repository import (TypeDocumentRepository, TypeDocumentModelOut,
                                                               TypeDocumentModelIn)
 from src.infrastructure.adapters.data_sources.db_config import session
@@ -12,9 +13,14 @@ class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
     async def add_type_document(type_document: TypeDocumentModelIn) -> TypeDocumentModelOut:
         new_type_document = TypeDocumentEntity(name_type_document=type_document.name_type_document, code_type_document=type_document.code_type_document)
         session.add(new_type_document)
-        session.commit()
-        session.refresh(new_type_document)
-        session.close()
+        try:
+            session.commit()
+            session.refresh(new_type_document)
+            session.close()
+        except IntegrityError:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a type document with the code: {type_document.code_type_document}")
         type_document_model_out = TypeDocumentModelOut(
             id_type_document=new_type_document.id_type_document,
             name_type_docuemnt=new_type_document.name_type_document,
@@ -56,8 +62,14 @@ class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
             name_type_document=type_document.name_type_document,
             code_gender=type_document.code_type_document
         )
-        session.commit()
-        session.close()
+        try:
+            session.commit()
+            session.close()
+        except IntegrityError:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a type document with the code: "
+                                       f"{type_document.code_type_document}")
         return type_document_model_out
 
     @staticmethod

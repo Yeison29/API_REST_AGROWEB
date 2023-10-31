@@ -19,7 +19,7 @@ class AuthenticationRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def update_auth(id_auth: int, auth: AuthenticationModelIn) -> AuthenticationModelIn:
+    async def update_auth(id_user: int, auth_email: str) -> AuthenticationModelOut:
         pass
 
     @staticmethod

@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from src.domain.repositories.country_repository import CountryRepository, CountryModelIn, CountryModelOut
 from src.infrastructure.adapters.data_sources.db_config import session
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (CountryEntity)
@@ -11,9 +12,14 @@ class CountryRepositoryAdapter(CountryRepository):
     async def add_country(country: CountryModelIn) -> CountryModelOut:
         new_country = CountryEntity(name_country=country.name_country, code_country=country.code_country)
         session.add(new_country)
-        session.commit()
-        session.refresh(new_country)
-        session.close()
+        try:
+            session.commit()
+            session.refresh(new_country)
+            session.close()
+        except IntegrityError:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a country with the code: {country.code_country}")
         country_model_out = CountryModelOut(
             id_country=new_country.id_country,
             name_country=new_country.name_country,
@@ -55,8 +61,13 @@ class CountryRepositoryAdapter(CountryRepository):
             name_country=country.name_country,
             code_country=country.code_country
         )
-        session.commit()
-        session.close()
+        try:
+            session.commit()
+            session.close()
+        except IntegrityError:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a country with the code: {country.code_country}")
         return country_model_out
 
     @staticmethod

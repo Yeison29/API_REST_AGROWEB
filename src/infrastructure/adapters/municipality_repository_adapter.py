@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from src.domain.repositories.municipality_repository import (MunicipalityRepository, MunicipalityModelOut,
                                                              MunicipalityModelIn)
 from src.infrastructure.adapters.data_sources.db_config import session
@@ -14,9 +15,14 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
                                               code_municipality=municipality.code_municipality,
                                               department_id=municipality.department_id)
         session.add(new_municipality)
-        session.commit()
-        session.refresh(new_municipality)
-        session.close()
+        try:
+            session.commit()
+            session.refresh(new_municipality)
+            session.close()
+        except IntegrityError:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a municipality with the code: {municipality.code_municipality}")
         municipality_model_out = MunicipalityModelOut(
             id_municipality=new_municipality.id_municipality,
             name_municipality=new_municipality.name_municipality,
@@ -61,8 +67,13 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
             code_municipality=municipality.code_municipality,
             department_id=municipality.department_id
         )
-        session.commit()
-        session.close()
+        try:
+            session.commit()
+            session.close()
+        except IntegrityError:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a municipality with the code: {municipality.code_municipality}")
         return municipality_model_out
 
     @staticmethod

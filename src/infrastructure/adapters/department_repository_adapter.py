@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from src.domain.repositories.department_repository import DepartmentRepository, DepartmentModelOut, DepartmentModelIn
 from src.infrastructure.adapters.data_sources.db_config import session
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (DepartmentEntity)
@@ -12,9 +13,14 @@ class DepartmentRepositoryAdapter(DepartmentRepository):
         new_department = DepartmentEntity(name_department=department.name_department,
                                           code_department=department.code_department, country_id=department.country_id)
         session.add(new_department)
-        session.commit()
-        session.refresh(new_department)
-        session.close()
+        try:
+            session.commit()
+            session.refresh(new_department)
+            session.close()
+        except IntegrityError:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a department with the code: {department.code_department}")
         country_model_out = DepartmentModelOut(
             id_department=new_department.id_department,
             name_department=new_department.name_department,
@@ -59,8 +65,13 @@ class DepartmentRepositoryAdapter(DepartmentRepository):
             code_department=department.code_department,
             country_id=department.country_id
         )
-        session.commit()
-        session.close()
+        try:
+            session.commit()
+            session.close()
+        except IntegrityError:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a department with the code: {department.code_department}")
         return department_model_out
 
     @staticmethod

@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from src.domain.repositories.user_repository import UserRepository, UserModelIn, UserModelOut
 from src.infrastructure.adapters.data_sources.db_config import session
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (UserEntity)
@@ -14,9 +15,14 @@ class UserRepositoryAdapter(UserRepository):
                               phone_user=user.phone_user, type_document_id=user.type_document_id,
                               gender_id=user.gender_id, municipality_id=user.municipality_id)
         session.add(new_user)
-        session.commit()
-        session.refresh(new_user)
-        session.close()
+        try:
+            session.commit()
+            session.refresh(new_user)
+            session.close()
+        except IntegrityError as e:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a user: {e}")
         user_model_out = UserModelOut(
             id_user=new_user.id_user,
             name_user=new_user.name_user,
@@ -44,7 +50,7 @@ class UserRepositoryAdapter(UserRepository):
                 name_user=query.name_user,
                 lastname_user=query.lastname_user,
                 phone_user=query.phone_user,
-                email_user=query.id_document_user,
+                email_user=query.email_user,
                 id_document_user=query.id_document_user,
                 birthdate_user=query.birthdate_user,
                 type_document_id=query.type_document_id,
@@ -72,15 +78,20 @@ class UserRepositoryAdapter(UserRepository):
             name_user=user.name_user,
             lastname_user=user.lastname_user,
             phone_user=user.phone_user,
-            email_user=user.id_document_user,
+            email_user=user.email_user,
             id_document_user=user.id_document_user,
             birthdate_user=user.birthdate_user,
             type_document_id=user.type_document_id,
             gender_id=user.gender_id,
             municipality_id=user.municipality_id
         )
-        session.commit()
-        session.close()
+        try:
+            session.commit()
+            session.close()
+        except IntegrityError as e:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a user: {e}")
         return user_model_out
 
     @staticmethod
@@ -92,7 +103,7 @@ class UserRepositoryAdapter(UserRepository):
                 name_user=q.name_user,
                 lastname_user=q.lastname_user,
                 phone_user=q.phone_user,
-                email_user=q.id_document_user,
+                email_user=q.email_user,
                 id_document_user=q.id_document_user,
                 birthdate_user=q.birthdate_user,
                 type_document_id=q.type_document_id,

@@ -1,5 +1,6 @@
 from typing import List, Union
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
@@ -51,8 +52,31 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
             return auth_model_out
 
     @staticmethod
-    async def update_auth(id_auth: int, auth: AuthenticationModelIn) -> AuthenticationModelIn:
-        pass
+    async def update_auth(id_user: int, auth_email: str) -> AuthenticationModelOut:
+        query = session.query(AuthenticationEntity).where(AuthenticationEntity.user_id == id_user).first()
+        if not query:
+            session.commit()
+            session.close()
+            raise HTTPException(status_code=404, detail="Authentication not found")
+        else:
+            if hasattr(query, 'email_user_auth'):
+                setattr(query, 'email_user_auth', auth_email)
+
+        auth_model_out = AuthenticationModelOut(
+            id_auth=query.id_auth,
+            auth_password=query.password_auth,
+            auth_email_user=auth_email,
+            auth_user_id=query.user_id,
+            auth_disabled=query.disabled_auth
+        )
+        try:
+            session.commit()
+            session.close()
+        except IntegrityError:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a authentication with the email: {auth_email}")
+        return auth_model_out
 
     @staticmethod
     async def get_all_auths() -> List[AuthenticationModelOut]:

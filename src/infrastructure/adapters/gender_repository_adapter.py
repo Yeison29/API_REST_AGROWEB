@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from src.domain.repositories.gender_repository import GenderRepository, GenderModelIn, GenderModelOut
 from src.infrastructure.adapters.data_sources.db_config import session
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (GenderEntity)
@@ -11,9 +12,14 @@ class GenderRepositoryAdapter(GenderRepository):
     async def add_gender(gender: GenderModelIn) -> GenderModelOut:
         new_gender = GenderEntity(name_gender=gender.name_gender, code_gender=gender.code_gender)
         session.add(new_gender)
-        session.commit()
-        session.refresh(new_gender)
-        session.close()
+        try:
+            session.commit()
+            session.refresh(new_gender)
+            session.close()
+        except IntegrityError:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a gender with the code: {gender.code_gender}")
         gender_model_out = GenderModelOut(
             id_gender=new_gender.id_gender,
             name_gender=new_gender.name_gender,
@@ -55,8 +61,13 @@ class GenderRepositoryAdapter(GenderRepository):
             name_gender=gender.name_gender,
             code_gender=gender.code_gender
         )
-        session.commit()
-        session.close()
+        try:
+            session.commit()
+            session.close()
+        except IntegrityError:
+            session.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a gender with the code: {gender.code_gender}")
         return gender_model_out
 
     @staticmethod

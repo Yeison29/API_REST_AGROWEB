@@ -40,6 +40,11 @@ class AuthenticationUseCase:
         return token
 
     @staticmethod
+    async def update_auth(id_user: int, auth_email: str) -> AuthenticationModelOut:
+        updated_auth = await auth_repository.update_auth(id_user, auth_email)
+        return updated_auth
+
+    @staticmethod
     async def form_data_to_authenticate_model_receive(form_data: OAuth2PasswordRequestForm = Depends()) -> (
             AuthenticationModelReceive):
         auth_model_receive = AuthenticationModelReceive(

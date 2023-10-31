@@ -26,6 +26,7 @@ class UserUseCase:
         validate_token = await AuthenticationUseCase.get_user_current(token)
         if validate_token is True:
             updated_user = await user_repository.update_user(id_user, user_update)
+            await AuthenticationUseCase.update_auth(id_user, user_update.email_user)
             return updated_user
 
     @staticmethod
