@@ -9,6 +9,7 @@ from src.domain.uses_cases.department_use_cases import DepartmentModelOut
 from src.domain.uses_cases.municipality_use_cases import MunicipalityModelOut
 from src.domain.uses_cases.haverst_use_cases import HarvestModelOut
 from src.domain.uses_cases.crop_use_cases import CropModelOut
+from src.domain.uses_cases.weeks_statistics_use_case import WeeksStatisticsModel
 from src.infrastructure.contrrollers.api_rest import ApiRest
 
 
@@ -92,3 +93,5 @@ class ApiRouter:
             ApiRest.update_crop)
         self.router.delete("/api/delete-crop", status_code=204, response_model=None)(
             ApiRest.delete_crop)
+        self.router.get("/api/weeks-statisticas", status_code=200, response_model=List[WeeksStatisticsModel])(
+            ApiRest.weeks_statisticas)

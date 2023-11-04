@@ -73,7 +73,8 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
-                                detail=f"There is already a municipality with the code: {municipality.code_municipality}")
+                                detail=f"There is already a municipality with the code: "
+                                       f"{municipality.code_municipality}")
         return municipality_model_out
 
     @staticmethod

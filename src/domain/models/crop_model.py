@@ -15,6 +15,7 @@ class CropModelIn(BaseModel):
 
 class CropModelOut(CropModelIn):
     id_crop: int
+    activate: bool
 
 
 class CropModelUpdate(CropModelIn):

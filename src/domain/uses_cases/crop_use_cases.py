@@ -41,3 +41,8 @@ class CropUseCase:
         if validate_token is True:
             delete_crop = await crop_repository.delete_crop(id_crop)
             return delete_crop
+
+    @staticmethod
+    async def get_all_crops_harvest_by_id(harvest_id: int) -> List[CropModelOut]:
+        crops = await crop_repository.gat_all_crops_harvest_by_id(harvest_id)
+        return crops

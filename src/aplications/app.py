@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from src.infrastructure.contrrollers.routers import ApiRouter
-from src.infrastructure.adapters.data_sources.db_config import create_tables, database
+from src.infrastructure.adapters.data_sources.db_config import create_tables, database, update_weeks_crops_periodicals
 
 api_router = ApiRouter()
 
@@ -12,6 +12,7 @@ class App:
 
     def configure(self):
         create_tables()
+        update_weeks_crops_periodicals()
         self.app.include_router(api_router.router)
 
     @staticmethod

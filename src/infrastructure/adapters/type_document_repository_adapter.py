@@ -11,7 +11,8 @@ class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
 
     @staticmethod
     async def add_type_document(type_document: TypeDocumentModelIn) -> TypeDocumentModelOut:
-        new_type_document = TypeDocumentEntity(name_type_document=type_document.name_type_document, code_type_document=type_document.code_type_document)
+        new_type_document = TypeDocumentEntity(name_type_document=type_document.name_type_document,
+                                               code_type_document=type_document.code_type_document)
         session.add(new_type_document)
         try:
             session.commit()
@@ -20,7 +21,8 @@ class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
-                                detail=f"There is already a type document with the code: {type_document.code_type_document}")
+                                detail=f"There is already a type document with the code: "
+                                       f"{type_document.code_type_document}")
         type_document_model_out = TypeDocumentModelOut(
             id_type_document=new_type_document.id_type_document,
             name_type_docuemnt=new_type_document.name_type_document,

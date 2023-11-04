@@ -8,6 +8,7 @@ from src.domain.uses_cases.municipality_use_cases import MunicipalityModelIn, Mu
 from src.domain.uses_cases.user_use_cases import AuthenticationModel, AuthenticationUseCase
 from src.domain.uses_cases.crop_use_cases import CropModelIn, CropUseCase
 from src.domain.uses_cases.haverst_use_cases import HarvestModelIn, HarvestUseCase
+from src.domain.uses_cases.weeks_statistics_use_case import WeeksStatisticsUseCase
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
@@ -228,4 +229,9 @@ class ApiRest:
     @staticmethod
     async def delete_harvest(id_harvest: int, token: str = Depends(oauth2_scheme)):
         response = await harvest_use_case.delete_harvest(id_harvest, token)
+        return response
+
+    @staticmethod
+    async def weeks_statisticas(harvest_id: int, token: str = Depends(oauth2_scheme)):
+        response = await WeeksStatisticsUseCase.get_future_weeks_harvesting(harvest_id, token)
         return response

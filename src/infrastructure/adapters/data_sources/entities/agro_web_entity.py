@@ -79,6 +79,7 @@ class CropEntity(Base):
     seed_time = Column(Date, nullable=False)
     approximate_durability_date = Column(Date, nullable=False)
     approximate_weeks_crop_durability = Column(Integer, nullable=False)
+    activate = Column(Boolean, nullable=False)
     harvest_id = Column(Integer, ForeignKey('harvest_agroweb.id_harvest'))
     user_id = Column(Integer, ForeignKey('user_agroweb.id_user'))
 

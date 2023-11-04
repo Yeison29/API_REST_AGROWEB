@@ -29,3 +29,8 @@ class CropRepository(ABC):
     @abstractmethod
     async def delete_crop(id_crop: int) -> None:
         pass
+
+    @staticmethod
+    @abstractmethod
+    async def gat_all_crops_harvest_by_id(harvest_id: int) -> List[CropModelOut]:
+        pass
