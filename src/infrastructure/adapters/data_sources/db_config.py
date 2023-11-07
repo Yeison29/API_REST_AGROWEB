@@ -1,10 +1,13 @@
-from sqlalchemy import (create_engine, update, extract, text)
+from sqlalchemy import (create_engine, func)
 from dotenv import load_dotenv
 from sqlalchemy.orm import sessionmaker
 from apscheduler.schedulers.background import BackgroundScheduler
 from src.infrastructure.adapters.data_sources.entities import agro_web_entity
 import os
 from datetime import datetime
+import pytz
+
+time_zone = pytz.timezone('America/Bogota')
 
 load_dotenv()
 
@@ -27,23 +30,30 @@ def create_tables():
 
 
 def update_weeks_crops():
-
-    update_query = text(
-        f"UPDATE {'crop_agroweb'} SET {'activate'} = 'false' "
-        f"WHERE EXTRACT(WEEK FROM {'approximate_durability_date'}) + "
-        f"{'approximate_weeks_crop_durability'} < EXTRACT(WEEK FROM current_date) AND {'activate'} = 'true'"
-    )
-    hora_actual = datetime.now().strftime("%H:%M:%S")
+    update_query = (session.query(agro_web_entity.CropEntity).
+                    filter((func.extract('week', agro_web_entity.
+                                         CropEntity.approximate_durability_date) + agro_web_entity.
+                           CropEntity.approximate_weeks_crop_durability - 1 < func.
+                           extract('week', func.current_date()))
+                           | ((func.extract('year', func.current_date()) >
+                              func.extract('year', agro_web_entity.CropEntity.approximate_durability_date)) &
+                              (func.extract('week', agro_web_entity.
+                                            CropEntity.approximate_durability_date) + agro_web_entity.
+                               CropEntity.approximate_weeks_crop_durability - 53 < func.
+                               extract('week', func.current_date()))
+                              )).
+                    filter(agro_web_entity.CropEntity.activate == True).
+                    update({agro_web_entity.CropEntity.activate: False}, synchronize_session=False))
+    hora_actual = datetime.now(time_zone).strftime("%H:%M:%S")
     print(hora_actual)
-    session.execute(update_query)
     session.commit()
     session.close()
-    print("actualizar activate")
+    print("We update crop statuses")
 
 
 def update_weeks_crops_periodicals():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(update_weeks_crops, 'cron', hour=4, minute=0)
+    scheduler.add_job(update_weeks_crops, 'cron', hour=2, minute=0)
     scheduler.start()
 
 
