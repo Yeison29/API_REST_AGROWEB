@@ -1,5 +1,8 @@
 from typing import List
-from src.infrastructure.adapters.crop_repository_adapter import CropRepositoryAdapter, CropModelIn, CropModelOut
+
+import src.domain.models.municipality_production_model
+from src.infrastructure.adapters.crop_repository_adapter import (CropRepositoryAdapter, CropModelIn, CropModelOut,
+                                                                 MunicipalityProductionModelOut)
 from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase
 
 crop_repository = CropRepositoryAdapter
@@ -44,5 +47,10 @@ class CropUseCase:
 
     @staticmethod
     async def get_all_crops_harvest_by_id(harvest_id: int) -> List[CropModelOut]:
-        crops = await crop_repository.gat_all_crops_harvest_by_id(harvest_id)
+        crops = await crop_repository.get_all_crops_harvest_by_id(harvest_id)
+        return crops
+
+    @staticmethod
+    async def get_most_planted_crop_by_municipality() -> List[MunicipalityProductionModelOut]:
+        crops = await crop_repository.get_all_crops_past()
         return crops

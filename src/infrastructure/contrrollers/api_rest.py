@@ -235,3 +235,8 @@ class ApiRest:
     async def weeks_statisticas(harvest_id: int, token: str = Depends(oauth2_scheme)):
         response = await WeeksStatisticsUseCase.get_future_weeks_harvesting(harvest_id, token)
         return response
+
+    @staticmethod
+    async def most_planted_crop_by_municipality(token: str = Depends(oauth2_scheme)):
+        response = await WeeksStatisticsUseCase.get_most_planted_crop_by_municipality(token)
+        return response

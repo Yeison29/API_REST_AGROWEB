@@ -1,8 +1,11 @@
 from typing import List
 from fastapi import HTTPException
-from src.domain.repositories.crop_repository import CropRepository, CropModelIn, CropModelOut
+from src.domain.repositories.crop_repository import (CropRepository, CropModelIn, CropModelOut,
+                                                     MunicipalityProductionModelOut)
 from src.infrastructure.adapters.data_sources.db_config import session
-from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (CropEntity)
+from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (CropEntity, UserEntity,
+                                                                               MunicipalityEntity, HarvestEntity)
+import pandas as pd
 
 
 class CropRepositoryAdapter(CropRepository):
@@ -111,7 +114,7 @@ class CropRepositoryAdapter(CropRepository):
         return None
 
     @staticmethod
-    async def gat_all_crops_harvest_by_id(harvest_id: int) -> List[CropModelOut]:
+    async def get_all_crops_harvest_by_id(harvest_id: int) -> List[CropModelOut]:
         query = session.query(CropEntity).where(CropEntity.harvest_id == harvest_id, CropEntity.activate).all()
         if not query:
             session.commit()
@@ -134,3 +137,34 @@ class CropRepositoryAdapter(CropRepository):
             session.commit()
             session.close()
             return crops_model_out_list
+
+    @staticmethod
+    async def get_all_crops_past() -> List[MunicipalityProductionModelOut]:
+        query = (
+            session.query(CropEntity, UserEntity, MunicipalityEntity, HarvestEntity)
+            .join(UserEntity, CropEntity.user_id == UserEntity.id_user)
+            .join(MunicipalityEntity, UserEntity.municipality_id == MunicipalityEntity.id_municipality)
+            .join(HarvestEntity, CropEntity.harvest_id == HarvestEntity.id_harvest)
+            .filter(~CropEntity.activate)
+            .all()
+        )
+        if not query:
+            session.commit()
+            session.close()
+            raise HTTPException(status_code=404, detail="Harvest not found or empty Crops")
+        else:
+            result = [
+                MunicipalityProductionModelOut(
+                    name_municipality=MunicipalityEntity.name_municipality,
+                    municipality_id=MunicipalityEntity.id_municipality,
+                    code_municipality=MunicipalityEntity.code_municipality,
+                    harvest_id=HarvestEntity.id_harvest,
+                    code_harvest=HarvestEntity.code_harvest,
+                    name_harvest=HarvestEntity.name_harvest,
+                    total_hectares=CropEntity.hectares
+                )
+                for CropEntity, UserEntity, MunicipalityEntity, HarvestEntity in query
+            ]
+            session.commit()
+            session.close()
+            return result
