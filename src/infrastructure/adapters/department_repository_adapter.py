@@ -75,8 +75,8 @@ class DepartmentRepositoryAdapter(DepartmentRepository):
         return department_model_out
 
     @staticmethod
-    async def get_all_departments() -> List[DepartmentModelOut]:
-        query = session.query(DepartmentEntity).all()
+    async def get_all_departments(id_country: int) -> List[DepartmentModelOut]:
+        query = session.query(DepartmentEntity).where(DepartmentEntity.country_id == id_country).all()
         departments_model_out_list = [
             DepartmentModelOut(
                 id_department=q.id_department,

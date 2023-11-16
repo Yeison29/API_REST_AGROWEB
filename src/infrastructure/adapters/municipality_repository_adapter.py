@@ -78,8 +78,8 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
         return municipality_model_out
 
     @staticmethod
-    async def get_all_municipalities() -> List[MunicipalityModelOut]:
-        query = session.query(MunicipalityEntity).all()
+    async def get_all_municipalities(id_department: int) -> List[MunicipalityModelOut]:
+        query = session.query(MunicipalityEntity).where(MunicipalityEntity.department_id == id_department).all()
         municipalities_model_out_list = [
             MunicipalityModelOut(
                 id_municipality=q.id_municipality,

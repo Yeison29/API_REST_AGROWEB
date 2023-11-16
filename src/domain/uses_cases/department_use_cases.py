@@ -31,8 +31,8 @@ class DepartmentUseCase:
             return updated_department
 
     @staticmethod
-    async def get_all_departments() -> List[DepartmentModelOut]:
-        departments = await department_repository.get_all_departments()
+    async def get_all_departments(id_country: int) -> List[DepartmentModelOut]:
+        departments = await department_repository.get_all_departments(id_country)
         return departments
 
     @staticmethod

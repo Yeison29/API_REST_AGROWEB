@@ -22,7 +22,7 @@ class MunicipalityRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def get_all_municipalities() -> List[MunicipalityModelOut]:
+    async def get_all_municipalities(id_department: int) -> List[MunicipalityModelOut]:
         pass
 
     @staticmethod

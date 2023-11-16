@@ -22,7 +22,7 @@ class DepartmentRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def get_all_departments() -> List[DepartmentModelOut]:
+    async def get_all_departments(id_country: int) -> List[DepartmentModelOut]:
         pass
 
     @staticmethod

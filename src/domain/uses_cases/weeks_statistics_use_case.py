@@ -17,8 +17,10 @@ class WeeksStatisticsUseCase:
             crops = await CropUseCase.get_all_crops_harvest_by_id(harvest_id)
             weeks_model_list = [
                 WeeksStatisticsModel(
-                    initial_week=c.approximate_durability_date.isocalendar()[1],
-                    final_week=c.approximate_durability_date.isocalendar()[1] + c.approximate_weeks_crop_durability - 1,
+                    initial_week=await WeeksStatisticsUseCase.get_number_week(
+                        c.approximate_durability_date.isocalendar()[1]),
+                    final_week=await WeeksStatisticsUseCase.get_number_week(
+                        c.approximate_durability_date.isocalendar()[1] + c.approximate_weeks_crop_durability - 1),
                     weeks=await WeeksStatisticsUseCase.get_weeks(
                         c.approximate_durability_date.isocalendar()[1],
                         c.approximate_durability_date.isocalendar()[1] + c.approximate_weeks_crop_durability - 1,
