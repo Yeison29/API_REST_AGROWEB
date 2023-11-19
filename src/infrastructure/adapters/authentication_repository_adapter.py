@@ -48,7 +48,6 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
             .where(AuthenticationEntity.email_user_auth == email_user)
         )
         query = session.execute(stmt).first()
-        print(query)
         if not query:
             session.commit()
             session.close()
