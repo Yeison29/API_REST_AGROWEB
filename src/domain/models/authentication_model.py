@@ -20,6 +20,10 @@ class AuthenticationModelOut(AuthenticationModelIn):
     id_auth: int
 
 
+class AuthenticationModelOutToken(AuthenticationModelOut):
+    name_user: str
+
+
 class AuthenticationModelUpdate(AuthenticationModelIn):
     auth_email: Optional[str] = None
     auth_password: Optional[str] = None

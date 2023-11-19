@@ -5,11 +5,15 @@ from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from fastapi_mail import FastMail, MessageSchema, MessageType
+from sqlalchemy.future import select
+from sqlalchemy.orm import joinedload
+
 from src.domain.repositories.authentication_repository import (AuthenticationRepository, AuthenticationModelOut,
-                                                               AuthenticationModelIn, ActivateAccountModel)
+                                                               AuthenticationModelIn, ActivateAccountModel,
+                                                               AuthenticationModelOutToken)
 from src.infrastructure.adapters.data_sources.db_config import session, algorithm, secret_key
 from src.infrastructure.adapters.data_sources.email_config import conf
-from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (AuthenticationEntity)
+from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (AuthenticationEntity, UserEntity)
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
 
@@ -36,21 +40,29 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
         return auth_model_out
 
     @staticmethod
-    async def get_auth_by_email(email_user: str) -> AuthenticationModelOut:
-        query = session.query(AuthenticationEntity).where(AuthenticationEntity.email_user_auth == email_user).first()
+    async def get_auth_by_email(email_user: str) -> AuthenticationModelOutToken:
+        #query = session.query(AuthenticationEntity).join(UserEntity).filter(AuthenticationEntity.email_user_auth == email_user).first()
+        stmt = (
+            select(AuthenticationEntity, UserEntity.name_user)
+            .join(UserEntity, AuthenticationEntity.user_id == UserEntity.id_user)
+            .where(AuthenticationEntity.email_user_auth == email_user)
+        )
+        query = session.execute(stmt).first()
+        print(query)
         if not query:
             session.commit()
             session.close()
             raise HTTPException(status_code=401, detail="Could not validate credentials",
                                 headers={"WWW-Authenticate": "Bearer"})
         else:
-            auth_model_out = AuthenticationModelOut(
-                id_auth=query.id_auth,
-                auth_password=query.password_auth,
-                auth_email_user=query.email_user_auth,
-                auth_user_id=query.user_id,
-                auth_disabled=query.disabled_auth,
-                code_valid=query.code_valid
+            auth_model_out = AuthenticationModelOutToken(
+                id_auth=query[0].id_auth,
+                auth_password=query[0].password_auth,
+                auth_email_user=query[0].email_user_auth,
+                auth_user_id=query[0].user_id,
+                auth_disabled=query[0].disabled_auth,
+                code_valid=query[0].code_valid,
+                name_user=query.name_user
             )
             session.commit()
             session.close()
@@ -132,6 +144,7 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
         else:
             if hasattr(query, 'disabled_auth'):
                 setattr(query, 'disabled_auth', False)
+                raise HTTPException(status_code=200, detail="Account active")
 
         try:
             session.commit()

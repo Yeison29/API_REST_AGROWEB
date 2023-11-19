@@ -1,9 +1,9 @@
 from typing import List, Union
 from datetime import timedelta
 from abc import ABC, abstractmethod
-from src.domain.models.authentication_model import AuthenticationModelIn, AuthenticationModelOut
+from src.domain.models.authentication_model import (AuthenticationModelIn, AuthenticationModelOut,
+                                                    AuthenticationModelOutToken)
 from src.domain.models.activate_account_model import ActivateAccountModel
-from src.domain.models.token_model import TokenModel
 
 
 class AuthenticationRepository(ABC):
@@ -15,7 +15,7 @@ class AuthenticationRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def get_auth_by_email(email_user: str) -> AuthenticationModelOut:
+    async def get_auth_by_email(email_user: str) -> AuthenticationModelOutToken:
         pass
 
     @staticmethod
@@ -40,7 +40,7 @@ class AuthenticationRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def get_user_current(token: TokenModel) -> bool:
+    async def get_user_current(token: str) -> bool:
         pass
 
     @staticmethod

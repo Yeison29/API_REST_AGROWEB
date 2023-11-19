@@ -43,7 +43,10 @@ class AuthenticationUseCase:
         access_token_jwt = await auth_repository.create_token({"sub": auth.auth_email_user}, access_token_expires)
         token = TokenModel(
             access_token=access_token_jwt,
-            token_type="bearer"
+            token_type="bearer",
+            user_id=auth.id_auth,
+            email_user=auth.auth_email_user,
+            name_user=auth.name_user
         )
         return token
 
