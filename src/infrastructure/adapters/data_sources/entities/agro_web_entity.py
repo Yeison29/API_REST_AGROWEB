@@ -11,6 +11,7 @@ class AuthenticationEntity(Base):
     email_user_auth = Column(String(319), unique=True, nullable=False)
     password_auth = Column(String, nullable=False)
     disabled_auth = Column(Boolean, nullable=False)
+    code_valid = Column(String(4), unique=False, nullable=False)
     user_id = Column(Integer, ForeignKey('user_agroweb.id_user'))
 
 

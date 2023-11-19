@@ -2,6 +2,7 @@ from typing import List, Union
 from datetime import timedelta
 from abc import ABC, abstractmethod
 from src.domain.models.authentication_model import AuthenticationModelIn, AuthenticationModelOut
+from src.domain.models.activate_account_model import ActivateAccountModel
 from src.domain.models.token_model import TokenModel
 
 
@@ -40,4 +41,14 @@ class AuthenticationRepository(ABC):
     @staticmethod
     @abstractmethod
     async def get_user_current(token: TokenModel) -> bool:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    async def send_email(data_user: AuthenticationModelOut, name_user: str) -> None:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    async def activate_account(data_user: ActivateAccountModel) -> None:
         pass

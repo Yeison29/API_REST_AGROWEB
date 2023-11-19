@@ -9,6 +9,7 @@ from src.domain.uses_cases.user_use_cases import AuthenticationModel, Authentica
 from src.domain.uses_cases.crop_use_cases import CropModelIn, CropUseCase
 from src.domain.uses_cases.haverst_use_cases import HarvestModelIn, HarvestUseCase
 from src.domain.uses_cases.weeks_statistics_use_case import WeeksStatisticsUseCase
+from src.domain.uses_cases.authentication_use_cases import ActivateAccountModel
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
@@ -239,4 +240,9 @@ class ApiRest:
     @staticmethod
     async def most_planted_crop_by_municipality(token: str = Depends(oauth2_scheme)):
         response = await WeeksStatisticsUseCase.get_most_planted_crop_by_municipality(token)
+        return response
+
+    @staticmethod
+    async def activate_account(data_activate: ActivateAccountModel):
+        response = await AuthenticationUseCase.activate_account(data_activate)
         return response

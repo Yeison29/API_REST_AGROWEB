@@ -13,6 +13,7 @@ class AuthenticationModelReceive(AuthenticationModel):
 
 class AuthenticationModelIn(AuthenticationModelReceive):
     auth_disabled: bool
+    code_valid: str
 
 
 class AuthenticationModelOut(AuthenticationModelIn):

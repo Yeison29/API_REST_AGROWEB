@@ -10,7 +10,7 @@ class UserUseCase:
     @staticmethod
     async def add_user(user: UserModelIn, auth: AuthenticationModel) -> UserModelOut:
         user_db = await user_repository.add_user(user)
-        await AuthenticationUseCase.add_auth(user_db.id_user, user_db.email_user, auth)
+        await AuthenticationUseCase.add_auth(user_db.id_user, user_db.email_user, auth, user_db.name_user)
         return user_db
 
     @staticmethod
