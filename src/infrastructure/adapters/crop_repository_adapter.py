@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import HTTPException
 from src.domain.repositories.crop_repository import (CropRepository, CropModelIn, CropModelOut,
-                                                     MunicipalityProductionModelOut)
+                                                     MunicipalityProductionModelOut, CropModelOut2)
 from src.infrastructure.adapters.data_sources.db_config import session
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (CropEntity, UserEntity,
                                                                                MunicipalityEntity, HarvestEntity)
@@ -148,6 +148,7 @@ class CropRepositoryAdapter(CropRepository):
             .filter(~CropEntity.activate)
             .all()
         )
+        print(query)
         if not query:
             session.commit()
             session.close()
@@ -168,3 +169,37 @@ class CropRepositoryAdapter(CropRepository):
             session.commit()
             session.close()
             return result
+
+    @staticmethod
+    async def get_most_widely_planted_crops() -> List[CropModelOut2]:
+        query = (
+            session.query(CropEntity, HarvestEntity)
+            .join(HarvestEntity, CropEntity.harvest_id == HarvestEntity.id_harvest)
+            .filter(CropEntity.activate)
+            .all()
+        )
+        if not query:
+            session.commit()
+            session.close()
+            raise HTTPException(status_code=404, detail="Harvest not found or empty Crops")
+        else:
+            result = [
+                CropModelOut2(
+                    id_crop=CropEntity.id_crop,
+                    hectares=CropEntity.hectares,
+                    seed_time=CropEntity.seed_time,
+                    approximate_durability_date=CropEntity.approximate_durability_date,
+                    approximate_weeks_crop_durability=CropEntity.approximate_weeks_crop_durability,
+                    activate=CropEntity.activate,
+                    harvest_id=CropEntity.harvest_id,
+                    user_id=CropEntity.user_id,
+                    name_harvest=HarvestEntity.name_harvest,
+                    code_harvest=HarvestEntity.code_harvest,
+                    id_harvest=HarvestEntity.id_harvest
+                )
+                for CropEntity, HarvestEntity in query
+            ]
+            session.commit()
+            session.close()
+            return result
+        pass

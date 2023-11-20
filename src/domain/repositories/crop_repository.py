@@ -1,7 +1,8 @@
 from typing import List
 from abc import ABC, abstractmethod
-from src.domain.models.crop_model import CropModelIn, CropModelOut
+from src.domain.models.crop_model import CropModelIn, CropModelOut, CropModelOut2
 from src.domain.models.municipality_production_model import MunicipalityProductionModelOut
+
 
 class CropRepository(ABC):
 
@@ -38,4 +39,9 @@ class CropRepository(ABC):
     @staticmethod
     @abstractmethod
     async def get_all_crops_past() -> List[MunicipalityProductionModelOut]:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    async def get_most_widely_planted_crops() -> List[CropModelOut2]:
         pass

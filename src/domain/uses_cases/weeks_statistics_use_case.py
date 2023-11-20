@@ -103,9 +103,28 @@ class WeeksStatisticsUseCase:
         df = pd.DataFrame([model.__dict__ for model in weeks_list])
         df_group = df.groupby(['week', 'initial_year', 'initial_month'])['total_hectares'].sum().reset_index()
         df_sorted = df_group.sort_values(by='initial_year')
-        #pd.set_option('display.max_columns', None)
-        #pd.set_option('display.expand_frame_repr', False)
-        dict_from_df = df_sorted.to_dict(orient='records')
+
+        df_sorted["start_date"] = df_sorted.apply(lambda row: datetime.strptime(f"{int(row['initial_year'])} "
+                                                                                f"{int(row['week'])} 1", "%G %V %u"),
+                                                  axis=1)
+
+        start_date = datetime.now() - timedelta(days=7)
+        end_date = df_sorted["start_date"].max()
+        date_range = pd.date_range(start_date, end_date, freq="W-Mon")
+
+        all_weeks_df = pd.DataFrame(date_range, columns=["start_date"])
+        all_weeks_df["week"] = all_weeks_df["start_date"].dt.strftime("%U").astype(int) + 1
+        all_weeks_df["initial_year"] = all_weeks_df["start_date"].dt.year
+        all_weeks_df["initial_month"] = all_weeks_df["start_date"].dt.month
+
+        merged_df = pd.merge(all_weeks_df, df_sorted, how="left", on=["week", "initial_year", "initial_month"])
+
+        merged_df["total_hectares"].fillna(0, inplace=True)
+        merged_df = merged_df.drop(merged_df.loc[merged_df['week'] > 52].index)
+
+        df_result = merged_df.drop(['start_date_x', 'start_date_y'], axis=1)
+
+        dict_from_df = df_result.to_dict(orient='records')
         return dict_from_df
 
     @staticmethod
@@ -119,8 +138,22 @@ class WeeksStatisticsUseCase:
     @staticmethod
     async def purge_data_municipality_production(data: List[MunicipalityProductionModelOut]) -> List[dict]:
         df = pd.DataFrame([model.__dict__ for model in data])
-        df_group = (df.groupby(['municipality_id', 'code_municipality', 'name_municipality'])['total_hectares'].sum().
+        df_group = (df.groupby(['municipality_id', 'code_municipality', 'name_municipality', 'harvest_id',
+                                'name_harvest', 'code_harvest'])['total_hectares'].sum().
                     reset_index())
         df_sorted = df_group.sort_values(by='total_hectares')
         dict_from_df = df_sorted.to_dict(orient='records')
         return dict_from_df
+
+    @staticmethod
+    async def most_widely_planted_crops(token: str) -> List[dict]:
+        validate_token = await AuthenticationUseCase.get_user_current(token)
+        if validate_token is True:
+            crops = await CropUseCase.get_most_widely_planted_crops()
+            df = pd.DataFrame([model.__dict__ for model in crops])
+            df_group = (df.groupby(['harvest_id',
+                                    'name_harvest', 'code_harvest'])['hectares'].sum().
+                        reset_index())
+            df_sorted = df_group.sort_values(by='hectares')
+            dict_from_df = df_sorted.to_dict(orient='records')
+            return dict_from_df

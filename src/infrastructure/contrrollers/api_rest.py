@@ -246,3 +246,8 @@ class ApiRest:
     async def activate_account(data_activate: ActivateAccountModel):
         response = await AuthenticationUseCase.activate_account(data_activate)
         return response
+
+    @staticmethod
+    async def most_widely_planted_crops(token: str = Depends(oauth2_scheme)):
+        response = await WeeksStatisticsUseCase.most_widely_planted_crops(token)
+        return response

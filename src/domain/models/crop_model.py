@@ -18,6 +18,12 @@ class CropModelOut(CropModelIn):
     activate: bool
 
 
+class CropModelOut2(CropModelOut):
+    name_harvest: str
+    code_harvest: str
+    id_harvest: int
+
+
 class CropModelUpdate(CropModelIn):
     hectares: Optional[float] = None
     seed_time: Optional[date] = Field(None, description="Fecha de siembra (YYYY-MM-DD)")
