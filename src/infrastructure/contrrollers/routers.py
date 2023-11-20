@@ -100,3 +100,7 @@ class ApiRouter:
             ApiRest.activate_account)
         self.router.get("/api/most-widely-planted-crops", status_code=200, response_model=List[dict])(
             ApiRest.most_widely_planted_crops)
+        self.router.get("/api/statistics-genres", status_code=200, response_model=List[dict])(
+            ApiRest.statistics_genres)
+        self.router.get("/api/age-range", status_code=200, response_model=List[dict])(
+            ApiRest.age_range)

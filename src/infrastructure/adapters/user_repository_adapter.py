@@ -1,9 +1,10 @@
 from typing import List
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
-from src.domain.repositories.user_repository import UserRepository, UserModelIn, UserModelOut
+from src.domain.repositories.user_repository import UserRepository, UserModelIn, UserModelOut, UserModelOut2
 from src.infrastructure.adapters.data_sources.db_config import session
-from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (UserEntity)
+from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (UserEntity, GenderEntity,
+                                                                               AuthenticationEntity)
 
 
 class UserRepositoryAdapter(UserRepository):
@@ -129,3 +130,68 @@ class UserRepositoryAdapter(UserRepository):
             session.commit()
             session.close()
         return None
+
+    @staticmethod
+    async def statistics_genres() -> List[UserModelOut2]:
+        query = (
+            session.query(UserEntity, GenderEntity, AuthenticationEntity.disabled_auth)
+            .join(GenderEntity, UserEntity.gender_id == GenderEntity.id_gender)
+            .filter(~AuthenticationEntity.disabled_auth)
+            .all()
+        )
+        if not query:
+            session.commit()
+            session.close()
+            raise HTTPException(status_code=404, detail="Harvest not found or empty Crops")
+        else:
+            result = [
+                UserModelOut2(
+                    id_user=UserEntity.id_user,
+                    name_user=UserEntity.name_user,
+                    lastname_user=UserEntity.lastname_user,
+                    phone_user=UserEntity.phone_user,
+                    email_user=UserEntity.email_user,
+                    id_document_user=UserEntity.id_document_user,
+                    birthdate_user=UserEntity.birthdate_user,
+                    type_document_id=UserEntity.type_document_id,
+                    gender_id=UserEntity.gender_id,
+                    municipality_id=UserEntity.municipality_id,
+                    name_gender=GenderEntity.name_gender,
+                    code_gender=GenderEntity.code_gender
+                )
+                for UserEntity, GenderEntity, auth in query
+            ]
+            session.commit()
+            session.close()
+            return result
+
+    @staticmethod
+    async def age_range() -> List[UserModelOut]:
+        query = (
+            session.query(UserEntity, AuthenticationEntity.disabled_auth)
+            .filter(~AuthenticationEntity.disabled_auth)
+            .all()
+        )
+        if not query:
+            session.commit()
+            session.close()
+            raise HTTPException(status_code=404, detail="Harvest not found or empty Crops")
+        else:
+            users_model_out_list = [
+                UserModelOut(
+                    id_user=q.id_user,
+                    name_user=q.name_user,
+                    lastname_user=q.lastname_user,
+                    phone_user=q.phone_user,
+                    email_user=q.email_user,
+                    id_document_user=q.id_document_user,
+                    birthdate_user=q.birthdate_user,
+                    type_document_id=q.type_document_id,
+                    gender_id=q.gender_id,
+                    municipality_id=q.municipality_id
+                )
+                for q, auth in query
+            ]
+            session.commit()
+            session.close()
+            return users_model_out_list

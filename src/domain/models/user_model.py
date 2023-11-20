@@ -20,6 +20,11 @@ class UserModelOut(UserModelIn):
     id_user: int
 
 
+class UserModelOut2(UserModelOut):
+    name_gender: str
+    code_gender: str
+
+
 class UserModelUpdate(UserModelIn):
     name_user: Optional[str] = None
     lastname_user: Optional[str] = None

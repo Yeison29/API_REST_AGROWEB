@@ -41,3 +41,13 @@ class UserUseCase:
         if validate_token is True:
             delete_user = await user_repository.delete_user(id_user)
             return delete_user
+
+    @staticmethod
+    async def statistics_genres() -> List[UserModelOut]:
+        users = await user_repository.statistics_genres()
+        return users
+
+    @staticmethod
+    async def age_renge() -> List[UserModelOut]:
+        ages = await user_repository.age_range()
+        return ages

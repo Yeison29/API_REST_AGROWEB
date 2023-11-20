@@ -251,3 +251,13 @@ class ApiRest:
     async def most_widely_planted_crops(token: str = Depends(oauth2_scheme)):
         response = await WeeksStatisticsUseCase.most_widely_planted_crops(token)
         return response
+
+    @staticmethod
+    async def statistics_genres(token: str = Depends(oauth2_scheme)):
+        response = await WeeksStatisticsUseCase.statistics_genres(token)
+        return response
+
+    @staticmethod
+    async def age_range(token: str = Depends(oauth2_scheme)):
+        response = await WeeksStatisticsUseCase.age_range(token)
+        return response

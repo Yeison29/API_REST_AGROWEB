@@ -2,6 +2,7 @@ from typing import List
 from datetime import datetime, date, timedelta
 from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase
 from src.domain.uses_cases.crop_use_cases import CropUseCase
+from src.domain.uses_cases.user_use_cases import UserUseCase
 from src.domain.models.weeks_statistics_model import WeeksStatisticsModel
 from src.domain.models.weeks_model import WeeksModel
 from src.domain.models.municipality_production_model import MunicipalityProductionModelOut
@@ -107,11 +108,9 @@ class WeeksStatisticsUseCase:
         df_sorted["start_date"] = df_sorted.apply(lambda row: datetime.strptime(f"{int(row['initial_year'])} "
                                                                                 f"{int(row['week'])} 1", "%G %V %u"),
                                                   axis=1)
-
         start_date = datetime.now() - timedelta(days=7)
-        end_date = df_sorted["start_date"].max()
+        end_date = df_sorted["start_date"].max() + timedelta(days=7)
         date_range = pd.date_range(start_date, end_date, freq="W-Mon")
-
         all_weeks_df = pd.DataFrame(date_range, columns=["start_date"])
         all_weeks_df["week"] = all_weeks_df["start_date"].dt.strftime("%U").astype(int) + 1
         all_weeks_df["initial_year"] = all_weeks_df["start_date"].dt.year
@@ -155,5 +154,31 @@ class WeeksStatisticsUseCase:
                                     'name_harvest', 'code_harvest'])['hectares'].sum().
                         reset_index())
             df_sorted = df_group.sort_values(by='hectares')
-            dict_from_df = df_sorted.to_dict(orient='records')
+            df_top_five = df_sorted.head(5)
+            dict_from_df = df_top_five.to_dict(orient='records')
+            return dict_from_df
+
+    @staticmethod
+    async def statistics_genres(token: str) -> List[dict]:
+        validate_token = await AuthenticationUseCase.get_user_current(token)
+        if validate_token is True:
+            genders = await UserUseCase.statistics_genres()
+            df = pd.DataFrame([model.__dict__ for model in genders])
+            df_group = (df.groupby(['gender_id',
+                                    'name_gender', 'code_gender'])['gender_id'].value_counts().reset_index())
+            dict_from_df = df_group.to_dict(orient='records')
+            return dict_from_df
+
+    @staticmethod
+    async def age_range(token: str) -> List[dict]:
+        validate_token = await AuthenticationUseCase.get_user_current(token)
+        if validate_token is True:
+            ages = await UserUseCase.age_renge()
+            df = pd.DataFrame([model.__dict__ for model in ages])
+            df['birthdate_user'] = pd.to_datetime(df['birthdate_user'])
+            df['age'] = df['birthdate_user'].apply(lambda x: (datetime.now() - x).days // 365)
+            range_age = [0, 18, 30, 50, float('inf')]
+            df['range_age'] = pd.cut(df['age'], bins=range_age, labels=['0-18', '19-30', '31-50', '51+'], right=False)
+            count_age = df.groupby('range_age').size().reset_index(name='count')
+            dict_from_df = count_age.to_dict(orient='records')
             return dict_from_df

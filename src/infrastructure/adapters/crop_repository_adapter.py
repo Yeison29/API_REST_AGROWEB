@@ -145,7 +145,7 @@ class CropRepositoryAdapter(CropRepository):
             .join(UserEntity, CropEntity.user_id == UserEntity.id_user)
             .join(MunicipalityEntity, UserEntity.municipality_id == MunicipalityEntity.id_municipality)
             .join(HarvestEntity, CropEntity.harvest_id == HarvestEntity.id_harvest)
-            .filter(~CropEntity.activate)
+            .filter(CropEntity.activate)
             .all()
         )
         print(query)
