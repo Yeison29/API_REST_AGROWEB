@@ -8,7 +8,7 @@ from src.domain.uses_cases.country_use_cases import CountryModelOut
 from src.domain.uses_cases.department_use_cases import DepartmentModelOut
 from src.domain.uses_cases.municipality_use_cases import MunicipalityModelOut
 from src.domain.uses_cases.haverst_use_cases import HarvestModelOut
-from src.domain.uses_cases.crop_use_cases import CropModelOut
+from src.domain.uses_cases.crop_use_cases import CropModelOut, CropModelOut2
 from src.infrastructure.contrrollers.api_rest import ApiRest
 
 
@@ -84,9 +84,9 @@ class ApiRouter:
             ApiRest.delete_harvest)
         self.router.post("/api/create-crop", status_code=201, response_model=CropModelOut)(
             ApiRest.add_crop)
-        self.router.get("/api/get-all-crops", status_code=200, response_model=List[CropModelOut])(
+        self.router.get("/api/get-all-crops", status_code=200, response_model=List[CropModelOut2])(
             ApiRest.get_all_crops)
-        self.router.get("/api/get-crop", status_code=200, response_model=CropModelOut)(
+        self.router.get("/api/get-crop", status_code=200, response_model=CropModelOut2)(
             ApiRest.get_crop_by_id)
         self.router.put("/api/update-crop", status_code=200, response_model=CropModelOut)(
             ApiRest.update_crop)

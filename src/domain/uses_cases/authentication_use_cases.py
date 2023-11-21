@@ -44,7 +44,7 @@ class AuthenticationUseCase:
         token = TokenModel(
             access_token=access_token_jwt,
             token_type="bearer",
-            user_id=auth.id_auth,
+            user_id=auth.auth_user_id,
             email_user=auth.auth_email_user,
             name_user=auth.name_user
         )

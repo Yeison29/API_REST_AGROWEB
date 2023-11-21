@@ -188,8 +188,8 @@ class ApiRest:
         return response
 
     @staticmethod
-    async def get_all_crops(token: str = Depends(oauth2_scheme)):
-        response = await crop_use_case.get_all_crops(token)
+    async def get_all_crops(user_id: int, token: str = Depends(oauth2_scheme)):
+        response = await crop_use_case.get_all_crops(user_id, token)
         return response
 
     @staticmethod

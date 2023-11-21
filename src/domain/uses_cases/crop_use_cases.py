@@ -17,7 +17,7 @@ class CropUseCase:
             return response
 
     @staticmethod
-    async def get_crop_by_id(id_crop: int, token: str) -> CropModelOut:
+    async def get_crop_by_id(id_crop: int, token: str) -> CropModelOut2:
         validate_token = await AuthenticationUseCase.get_user_current(token)
         if validate_token is True:
             crop = await crop_repository.get_crop_by_id(id_crop)
@@ -31,10 +31,10 @@ class CropUseCase:
             return updated_crop
 
     @staticmethod
-    async def get_all_crops(token: str) -> List[CropModelOut]:
+    async def get_all_crops(user_id: int, token: str) -> List[CropModelOut2]:
         validate_token = await AuthenticationUseCase.get_user_current(token)
         if validate_token is True:
-            crops = await crop_repository.get_all_crops()
+            crops = await crop_repository.get_all_crops(user_id)
             return crops
 
     @staticmethod

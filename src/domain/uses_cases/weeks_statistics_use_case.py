@@ -39,7 +39,6 @@ class WeeksStatisticsUseCase:
     @staticmethod
     async def get_weeks(initial_week: int, final_week: int, hectares: float, date_crop: date) -> List[WeeksModel]:
         week_now = datetime.now(time_zone).isocalendar()[1]
-        print(week_now)
         if week_now > initial_week:
             initial_week += (week_now-initial_week)
         weeks_list = [
@@ -67,7 +66,6 @@ class WeeksStatisticsUseCase:
             year += 1
             week -= 52
         initial_date = datetime.strptime(f'{year}-W{week}-1', '%Y-W%W-%w')
-        print(initial_date)
         return initial_date.year
 
     @staticmethod
@@ -77,8 +75,6 @@ class WeeksStatisticsUseCase:
             week -= 52
         date_crop = datetime.strptime(f'{year}-W{week}-1', '%Y-W%W-%w')
         final_date = date_crop + timedelta(days=6)
-        print(final_date)
-        print("********")
         return final_date.year
 
     @staticmethod
@@ -106,21 +102,20 @@ class WeeksStatisticsUseCase:
         df_sorted = df_group.sort_values(by='initial_year')
 
         df_sorted["start_date"] = df_sorted.apply(lambda row: datetime.strptime(f"{int(row['initial_year'])} "
-                                                                                f"{int(row['week'])} 1", "%G %V %u"),
+                                                                                f"{int(row['week'])} 7", "%G %V %u"),
                                                   axis=1)
         start_date = datetime.now() - timedelta(days=7)
         end_date = df_sorted["start_date"].max() + timedelta(days=7)
         date_range = pd.date_range(start_date, end_date, freq="W-Mon")
         all_weeks_df = pd.DataFrame(date_range, columns=["start_date"])
-        all_weeks_df["week"] = all_weeks_df["start_date"].dt.strftime("%U").astype(int) + 1
+        all_weeks_df["week"] = all_weeks_df["start_date"].dt.strftime("%U").astype(int)
         all_weeks_df["initial_year"] = all_weeks_df["start_date"].dt.year
         all_weeks_df["initial_month"] = all_weeks_df["start_date"].dt.month
-
         merged_df = pd.merge(all_weeks_df, df_sorted, how="left", on=["week", "initial_year", "initial_month"])
 
         merged_df["total_hectares"].fillna(0, inplace=True)
         merged_df = merged_df.drop(merged_df.loc[merged_df['week'] > 52].index)
-
+        merged_df = merged_df.drop(merged_df.loc[merged_df['week'] < 1].index)
         df_result = merged_df.drop(['start_date_x', 'start_date_y'], axis=1)
 
         dict_from_df = df_result.to_dict(orient='records')
@@ -140,6 +135,8 @@ class WeeksStatisticsUseCase:
         df_group = (df.groupby(['municipality_id', 'code_municipality', 'name_municipality', 'harvest_id',
                                 'name_harvest', 'code_harvest'])['total_hectares'].sum().
                     reset_index())
+        hectares_max = df_group.groupby('municipality_id')['total_hectares'].idxmax()
+        df_group = df.loc[hectares_max]
         df_sorted = df_group.sort_values(by='total_hectares')
         dict_from_df = df_sorted.to_dict(orient='records')
         return dict_from_df
