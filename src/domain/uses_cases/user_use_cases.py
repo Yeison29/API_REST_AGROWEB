@@ -51,3 +51,8 @@ class UserUseCase:
     async def age_renge() -> List[UserModelOut]:
         ages = await user_repository.age_range()
         return ages
+
+    @staticmethod
+    async def count_users() -> int:
+        count_users = await user_repository.count_users()
+        return count_users

@@ -45,3 +45,8 @@ class CropRepository(ABC):
     @abstractmethod
     async def get_most_widely_planted_crops() -> List[CropModelOut2]:
         pass
+
+    @staticmethod
+    @abstractmethod
+    async def count_hectares() -> int:
+        pass

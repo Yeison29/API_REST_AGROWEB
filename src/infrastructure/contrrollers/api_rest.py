@@ -9,6 +9,7 @@ from src.domain.uses_cases.user_use_cases import AuthenticationModel, Authentica
 from src.domain.uses_cases.crop_use_cases import CropModelIn, CropUseCase
 from src.domain.uses_cases.haverst_use_cases import HarvestModelIn, HarvestUseCase
 from src.domain.uses_cases.weeks_statistics_use_case import WeeksStatisticsUseCase
+from src.domain.uses_cases.connection_dane import ConnectionDane
 from src.domain.uses_cases.authentication_use_cases import ActivateAccountModel
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
@@ -260,4 +261,14 @@ class ApiRest:
     @staticmethod
     async def age_range(token: str = Depends(oauth2_scheme)):
         response = await WeeksStatisticsUseCase.age_range(token)
+        return response
+
+    @staticmethod
+    async def table_price(token: str = Depends(oauth2_scheme)):
+        response = await ConnectionDane.table_price(token)
+        return response
+
+    @staticmethod
+    async def home():
+        response = await WeeksStatisticsUseCase.home()
         return response

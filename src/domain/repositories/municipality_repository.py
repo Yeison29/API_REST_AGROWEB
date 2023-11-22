@@ -29,3 +29,8 @@ class MunicipalityRepository(ABC):
     @abstractmethod
     async def delete_municipality(id_municipality: int) -> None:
         pass
+
+    @staticmethod
+    @abstractmethod
+    async def count_municipalities() -> int:
+        pass

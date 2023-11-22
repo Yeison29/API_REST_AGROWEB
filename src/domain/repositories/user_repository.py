@@ -39,3 +39,8 @@ class UserRepository(ABC):
     @abstractmethod
     async def age_range() -> List[UserModelOut]:
         pass
+
+    @staticmethod
+    @abstractmethod
+    async def count_user() -> int:
+        pass

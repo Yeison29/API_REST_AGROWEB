@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from apscheduler.schedulers.background import BackgroundScheduler
 from src.infrastructure.adapters.data_sources.entities import agro_web_entity
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 
 time_zone = pytz.timezone('America/Bogota')
@@ -31,10 +31,14 @@ def create_tables():
 
 def update_weeks_crops():
     update_query = (session.query(agro_web_entity.CropEntity).
-                    filter((func.extract('week', agro_web_entity.
-                                         CropEntity.approximate_durability_date) + agro_web_entity.
+                    filter(((func.extract('week', agro_web_entity.
+                                          CropEntity.approximate_durability_date) + agro_web_entity.
                            CropEntity.approximate_weeks_crop_durability - 1 < func.
-                           extract('week', func.current_date()))
+                           extract('week', func.current_date())) & (func.current_date() >=
+                                                                    (agro_web_entity.CropEntity.
+                                                                     approximate_durability_date + func.make_interval
+                                                                    (weeks=agro_web_entity.CropEntity.
+                                                                     approximate_weeks_crop_durability))))
                            | ((func.extract('year', func.current_date()) >
                               func.extract('year', agro_web_entity.CropEntity.approximate_durability_date)) &
                               (func.extract('week', agro_web_entity.

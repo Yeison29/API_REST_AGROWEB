@@ -2,7 +2,7 @@ from typing import List
 from fastapi import HTTPException
 from src.domain.repositories.crop_repository import (CropRepository, CropModelIn, CropModelOut,
                                                      MunicipalityProductionModelOut, CropModelOut2)
-from src.infrastructure.adapters.data_sources.db_config import session
+from src.infrastructure.adapters.data_sources.db_config import session, func
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (CropEntity, UserEntity,
                                                                                MunicipalityEntity, HarvestEntity)
 import pandas as pd
@@ -216,3 +216,8 @@ class CropRepositoryAdapter(CropRepository):
             session.close()
             return result
         pass
+
+    @staticmethod
+    async def count_hectares() -> int:
+        count_hectares = session.query(func.sum(CropEntity.hectares)).scalar()
+        return count_hectares

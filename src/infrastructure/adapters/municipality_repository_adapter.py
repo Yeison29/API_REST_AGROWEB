@@ -106,3 +106,8 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
             session.commit()
             session.close()
         return None
+
+    @staticmethod
+    async def count_municipalities() -> int:
+        count_municipalities = session.query(MunicipalityEntity).count()
+        return count_municipalities

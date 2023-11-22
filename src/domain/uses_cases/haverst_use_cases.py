@@ -42,3 +42,8 @@ class HarvestUseCase:
         if validate_token is True:
             delete_harvest = await harvest_repository.delete_harvest(id_harvest)
             return delete_harvest
+
+    @staticmethod
+    async def count_harvests() -> int:
+        count_harvests = await harvest_repository.count_harvests()
+        return count_harvests

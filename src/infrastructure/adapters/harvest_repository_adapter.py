@@ -98,3 +98,8 @@ class HarvestRepositoryAdapter(HarvestRepository):
             session.commit()
             session.close()
         return None
+
+    @staticmethod
+    async def count_harvests() -> int:
+        count_harvests = session.query(HarvestEntity).count()
+        return count_harvests

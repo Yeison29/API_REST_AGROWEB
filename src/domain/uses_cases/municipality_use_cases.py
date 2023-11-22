@@ -41,3 +41,8 @@ class MunicipalityUseCase:
         if validate_token is True:
             delete_municipality = await municipality_repository.delete_municipality(id_municipality)
             return delete_municipality
+
+    @staticmethod
+    async def count_municipalities() -> int:
+        count_municipalities = await municipality_repository.count_municipalities()
+        return count_municipalities

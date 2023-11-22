@@ -58,3 +58,9 @@ class CropUseCase:
     async def get_most_widely_planted_crops() -> List[CropModelOut2]:
         crops = await crop_repository.get_most_widely_planted_crops()
         return crops
+
+    @staticmethod
+    async def count_hectares() -> int:
+        count_hectares = await crop_repository.count_hectares()
+        return count_hectares
+

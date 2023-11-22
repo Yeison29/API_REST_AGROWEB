@@ -104,3 +104,7 @@ class ApiRouter:
             ApiRest.statistics_genres)
         self.router.get("/api/age-range", status_code=200, response_model=List[dict])(
             ApiRest.age_range)
+        self.router.get("/api/table-price", status_code=200, response_model=List[dict])(
+            ApiRest.table_price)
+        self.router.get("/api/home", status_code=200, response_model=dict)(
+            ApiRest.home)

@@ -3,6 +3,8 @@ from datetime import datetime, date, timedelta
 from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase
 from src.domain.uses_cases.crop_use_cases import CropUseCase
 from src.domain.uses_cases.user_use_cases import UserUseCase
+from src.domain.uses_cases.haverst_use_cases import HarvestUseCase
+from src.domain.uses_cases.municipality_use_cases import MunicipalityUseCase
 from src.domain.models.weeks_statistics_model import WeeksStatisticsModel
 from src.domain.models.weeks_model import WeeksModel
 from src.domain.models.municipality_production_model import MunicipalityProductionModelOut
@@ -25,6 +27,7 @@ class WeeksStatisticsUseCase:
                     final_week=await WeeksStatisticsUseCase.get_number_week(
                         c.approximate_durability_date.isocalendar()[1] + c.approximate_weeks_crop_durability - 1),
                     weeks=await WeeksStatisticsUseCase.get_weeks(
+                        c.seed_time,
                         c.approximate_durability_date.isocalendar()[1],
                         c.approximate_durability_date.isocalendar()[1] + c.approximate_weeks_crop_durability - 1,
                         c.hectares,
@@ -33,13 +36,19 @@ class WeeksStatisticsUseCase:
                 )
                 for c in crops
             ]
+            print(weeks_model_list)
             response = await WeeksStatisticsUseCase.purge_data_weeks(weeks_model_list)
             return response
 
     @staticmethod
-    async def get_weeks(initial_week: int, final_week: int, hectares: float, date_crop: date) -> List[WeeksModel]:
-        week_now = datetime.now(time_zone).isocalendar()[1]
-        if week_now > initial_week:
+    async def get_weeks(initial_date: date, initial_week: int, final_week: int, hectares: float,
+                        date_crop: date) -> List[WeeksModel]:
+        print(date_crop)
+        date_year_now = datetime.now(time_zone).year
+        date_moth_now = datetime.now(time_zone).month
+        date_day_now = datetime.now(time_zone).day
+        if date_year_now < date_crop.year and date_moth_now < date_crop.month and date_day_now < date_crop.day:
+            week_now = datetime.now(time_zone).isocalendar()[1]
             initial_week += (week_now-initial_week)
         weeks_list = [
             WeeksModel(
@@ -98,7 +107,8 @@ class WeeksStatisticsUseCase:
     async def purge_data_weeks(data: List[WeeksStatisticsModel]) -> List[dict]:
         weeks_list = [week for item in data for week in item.weeks]
         df = pd.DataFrame([model.__dict__ for model in weeks_list])
-        df_group = df.groupby(['week', 'initial_year', 'initial_month'])['total_hectares'].sum().reset_index()
+        print(df)
+        df_group = df.groupby(['week', 'initial_year'])['total_hectares'].sum().reset_index()
         df_sorted = df_group.sort_values(by='initial_year')
 
         df_sorted["start_date"] = df_sorted.apply(lambda row: datetime.strptime(f"{int(row['initial_year'])} "
@@ -111,7 +121,7 @@ class WeeksStatisticsUseCase:
         all_weeks_df["week"] = all_weeks_df["start_date"].dt.strftime("%U").astype(int)
         all_weeks_df["initial_year"] = all_weeks_df["start_date"].dt.year
         all_weeks_df["initial_month"] = all_weeks_df["start_date"].dt.month
-        merged_df = pd.merge(all_weeks_df, df_sorted, how="left", on=["week", "initial_year", "initial_month"])
+        merged_df = pd.merge(all_weeks_df, df_sorted, how="left", on=["week", "initial_year"])
 
         merged_df["total_hectares"].fillna(0, inplace=True)
         merged_df = merged_df.drop(merged_df.loc[merged_df['week'] > 52].index)
@@ -132,12 +142,16 @@ class WeeksStatisticsUseCase:
     @staticmethod
     async def purge_data_municipality_production(data: List[MunicipalityProductionModelOut]) -> List[dict]:
         df = pd.DataFrame([model.__dict__ for model in data])
+        print(df)
         df_group = (df.groupby(['municipality_id', 'code_municipality', 'name_municipality', 'harvest_id',
                                 'name_harvest', 'code_harvest'])['total_hectares'].sum().
                     reset_index())
+        print(df_group)
         hectares_max = df_group.groupby('municipality_id')['total_hectares'].idxmax()
-        df_group = df.loc[hectares_max]
-        df_sorted = df_group.sort_values(by='total_hectares')
+        print(hectares_max)
+        df_group = df_group.loc[hectares_max]
+        print(df_group)
+        df_sorted = df_group.sort_values(by='total_hectares', ascending=False)
         dict_from_df = df_sorted.to_dict(orient='records')
         return dict_from_df
 
@@ -150,7 +164,7 @@ class WeeksStatisticsUseCase:
             df_group = (df.groupby(['harvest_id',
                                     'name_harvest', 'code_harvest'])['hectares'].sum().
                         reset_index())
-            df_sorted = df_group.sort_values(by='hectares')
+            df_sorted = df_group.sort_values(by='hectares', ascending=False)
             df_top_five = df_sorted.head(5)
             dict_from_df = df_top_five.to_dict(orient='records')
             return dict_from_df
@@ -179,3 +193,16 @@ class WeeksStatisticsUseCase:
             count_age = df.groupby('range_age').size().reset_index(name='count')
             dict_from_df = count_age.to_dict(orient='records')
             return dict_from_df
+
+    @staticmethod
+    async def home() -> dict:
+        count_users = await UserUseCase.count_users()
+        count_harvests = await HarvestUseCase.count_harvests()
+        count_municipalities = await MunicipalityUseCase.count_municipalities()
+        count_hectares = await CropUseCase.count_hectares()
+        return {
+            'count_users': count_users,
+            'count_harvests': count_harvests,
+            'count_municipalities': count_municipalities,
+            'count_hectares': round(count_hectares, 2)
+        }

@@ -195,3 +195,8 @@ class UserRepositoryAdapter(UserRepository):
             session.commit()
             session.close()
             return users_model_out_list
+
+    @staticmethod
+    async def count_users() -> int:
+        count_users = session.query(UserEntity).count()
+        return count_users

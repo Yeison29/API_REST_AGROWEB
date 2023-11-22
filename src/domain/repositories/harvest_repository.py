@@ -29,3 +29,8 @@ class HarvestRepository(ABC):
     @abstractmethod
     async def delete_harvest(id_harvest: int) -> None:
         pass
+
+    @staticmethod
+    @abstractmethod
+    async def count_harvests() -> int:
+        pass
