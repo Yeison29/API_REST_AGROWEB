@@ -2,3 +2,5 @@
 test_main.http
 /venv/*
 **/__pycache__/**
+
+*.env
