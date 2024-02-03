@@ -17,8 +17,8 @@ class AuthenticationUseCase:
 
     @staticmethod
     async def add_auth(user_id: int, auth_email_user: str, auth: AuthenticationModel, name_user: str) -> AuthenticationModelOut:
-        password_hashed = password_context.hash(auth.auth_password)
-        code = secrets.token_hex(2)[:4]
+        # password_hashed = password_context.hash(auth.auth_password)
+        # code = secrets.token_hex(2)[:4]
         auth_in = AuthenticationModelIn(
             auth_password=password_hashed,
             auth_email_user=auth_email_user,

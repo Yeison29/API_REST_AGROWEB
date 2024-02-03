@@ -1,15 +1,38 @@
 from typing import List
-from src.infrastructure.adapters.user_repository_adapter import UserRepositoryAdapter, UserModelOut, UserModelIn
-from src.domain.uses_cases.authentication_use_cases import AuthenticationUseCase, AuthenticationModel
+from src.infrastructure.adapters.user_repository_adapter import (UserRepositoryAdapter, UserModelOut, UserModelIn,
+                                                                 UserModelAuthIn)
+from src.domain.uses_cases.authentication_use_cases import (AuthenticationUseCase, AuthenticationModel,
+                                                            AuthenticationRepositoryAdapter)
+from passlib.context import CryptContext
+import secrets
 
 user_repository = UserRepositoryAdapter
+auth_repository = AuthenticationRepositoryAdapter
+password_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
 
 class UserUseCase:
 
     @staticmethod
     async def add_user(user: UserModelIn, auth: AuthenticationModel) -> UserModelOut:
-        user_db = await user_repository.add_user(user)
+        password_hashed = password_context.hash(auth.auth_password)
+        code = secrets.token_hex(2)[:4]
+        user_auth_in = UserModelAuthIn(
+            name_user=user.name_user,
+            lastname_user=user.lastname_user,
+            email_user=user.email_user,
+            phone_user=user.phone_user,
+            id_document_user=user.id_document_user,
+            birthdate_user=user.birthdate_user,
+            type_document_id=user.type_document_id,
+            gender_id=user.gender_id,
+            municipality_id=user.municipality_id,
+            auth_password=password_hashed,
+            code_valid=code
+        )
+        # response = await auth_repository.add_auth(auth_in)
+        # await AuthenticationUseCase.send_email(response, name_user)
+        user_db = await user_repository.add_user(user_auth_in)
         await AuthenticationUseCase.add_auth(user_db.id_user, user_db.email_user, auth, user_db.name_user)
         return user_db
 

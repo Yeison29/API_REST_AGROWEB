@@ -2,7 +2,7 @@ from typing import List, Union
 from datetime import timedelta
 from abc import ABC, abstractmethod
 from src.domain.models.authentication_model import (AuthenticationModelIn, AuthenticationModelOut,
-                                                    AuthenticationModelOutToken)
+                                                    AuthenticationModelOutToken, AuthenticationModel)
 from src.domain.models.activate_account_model import ActivateAccountModel
 
 

@@ -1,13 +1,13 @@
 from typing import List
 from abc import ABC, abstractmethod
-from src.domain.models.user_model import UserModelIn, UserModelOut, UserModelOut2
+from src.domain.models.user_model import UserModelIn, UserModelOut, UserModelOut2, UserModelAuthIn, UserModelAuthOut
 
 
 class UserRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def add_user(user: UserModelIn) -> UserModelOut:
+    async def add_user(user_auth_in: UserModelAuthIn) -> UserModelAuthOut:
         pass
 
     @staticmethod

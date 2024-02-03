@@ -16,8 +16,18 @@ class UserModelIn(BaseModel):
     municipality_id: int
 
 
+class UserModelAuthIn(UserModelIn):
+    auth_password: str
+    code_valid: str
+
+
 class UserModelOut(UserModelIn):
     id_user: int
+
+
+class UserModelAuthOut(UserModelIn):
+    id_user: int
+    id_auth: int
 
 
 class UserModelOut2(UserModelOut):

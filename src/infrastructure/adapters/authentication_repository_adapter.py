@@ -11,9 +11,7 @@ from sqlalchemy.orm import joinedload
 from src.domain.repositories.authentication_repository import (AuthenticationRepository, AuthenticationModelOut,
                                                                AuthenticationModelIn, ActivateAccountModel,
                                                                AuthenticationModelOutToken)
-from src.infrastructure.adapters.data_sources.db_config import session, algorithm, secret_key
 from src.infrastructure.adapters.data_sources.email_config import conf
-from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (AuthenticationEntity, UserEntity)
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
 
@@ -22,78 +20,81 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
 
     @staticmethod
     async def add_auth(auth: AuthenticationModelIn) -> AuthenticationModelOut:
-        new_auth = AuthenticationEntity(email_user_auth=auth.auth_email_user, password_auth=auth.auth_password,
-                                        disabled_auth=auth.auth_disabled, user_id=auth.auth_user_id,
-                                        code_valid=auth.code_valid)
-        session.add(new_auth)
-        session.commit()
-        session.refresh(new_auth)
-        session.close()
-        auth_model_out = AuthenticationModelOut(
-            id_auth=new_auth.id_auth,
-            auth_email_user=new_auth.email_user_auth,
-            auth_password=new_auth.password_auth,
-            auth_disabled=new_auth.disabled_auth,
-            auth_user_id=new_auth.user_id,
-            code_valid=new_auth.code_valid
-        )
-        return auth_model_out
+        # new_auth = AuthenticationEntity(email_user_auth=auth.auth_email_user, password_auth=auth.auth_password,
+        #                                 disabled_auth=auth.auth_disabled, user_id=auth.auth_user_id,
+        #                                 code_valid=auth.code_valid)
+        # session.add(new_auth)
+        # session.commit()
+        # session.refresh(new_auth)
+        # session.close()
+        # auth_model_out = AuthenticationModelOut(
+        #     id_auth=new_auth.id_auth,
+        #     auth_email_user=new_auth.email_user_auth,
+        #     auth_password=new_auth.password_auth,
+        #     auth_disabled=new_auth.disabled_auth,
+        #     auth_user_id=new_auth.user_id,
+        #     code_valid=new_auth.code_valid
+        # )
+        # return auth_model_out
+        pass
 
     @staticmethod
     async def get_auth_by_email(email_user: str) -> AuthenticationModelOutToken:
         #query = session.query(AuthenticationEntity).join(UserEntity).filter(AuthenticationEntity.email_user_auth == email_user).first()
-        stmt = (
-            select(AuthenticationEntity, UserEntity.name_user)
-            .join(UserEntity, AuthenticationEntity.user_id == UserEntity.id_user)
-            .where(AuthenticationEntity.email_user_auth == email_user)
-        )
-        query = session.execute(stmt).first()
-        if not query:
-            session.commit()
-            session.close()
-            raise HTTPException(status_code=401, detail="Could not validate credentials",
-                                headers={"WWW-Authenticate": "Bearer"})
-        else:
-            auth_model_out = AuthenticationModelOutToken(
-                id_auth=query[0].id_auth,
-                auth_password=query[0].password_auth,
-                auth_email_user=query[0].email_user_auth,
-                auth_user_id=query[0].user_id,
-                auth_disabled=query[0].disabled_auth,
-                code_valid=query[0].code_valid,
-                name_user=query.name_user
-            )
-            session.commit()
-            session.close()
-            return auth_model_out
+        # stmt = (
+        #     select(AuthenticationEntity, UserEntity.name_user)
+        #     .join(UserEntity, AuthenticationEntity.user_id == UserEntity.id_user)
+        #     .where(AuthenticationEntity.email_user_auth == email_user)
+        # )
+        # query = session.execute(stmt).first()
+        # if not query:
+        #     session.commit()
+        #     session.close()
+        #     raise HTTPException(status_code=401, detail="Could not validate credentials",
+        #                         headers={"WWW-Authenticate": "Bearer"})
+        # else:
+        #     auth_model_out = AuthenticationModelOutToken(
+        #         id_auth=query[0].id_auth,
+        #         auth_password=query[0].password_auth,
+        #         auth_email_user=query[0].email_user_auth,
+        #         auth_user_id=query[0].user_id,
+        #         auth_disabled=query[0].disabled_auth,
+        #         code_valid=query[0].code_valid,
+        #         name_user=query.name_user
+        #     )
+        #     session.commit()
+        #     session.close()
+        #     return auth_model_out
+        pass
 
     @staticmethod
     async def update_auth(id_user: int, auth_email: str) -> AuthenticationModelOut:
-        query = session.query(AuthenticationEntity).where(AuthenticationEntity.user_id == id_user).first()
-        if not query:
-            session.commit()
-            session.close()
-            raise HTTPException(status_code=404, detail="Authentication not found")
-        else:
-            if hasattr(query, 'email_user_auth'):
-                setattr(query, 'email_user_auth', auth_email)
-
-        auth_model_out = AuthenticationModelOut(
-            id_auth=query.id_auth,
-            auth_password=query.password_auth,
-            auth_email_user=auth_email,
-            auth_user_id=query.user_id,
-            auth_disabled=query.disabled_auth,
-            code_valid=query.code_valid
-        )
-        try:
-            session.commit()
-            session.close()
-        except IntegrityError:
-            session.rollback()
-            raise HTTPException(status_code=400,
-                                detail=f"There is already a authentication with the email: {auth_email}")
-        return auth_model_out
+        # query = session.query(AuthenticationEntity).where(AuthenticationEntity.user_id == id_user).first()
+        # if not query:
+        #     session.commit()
+        #     session.close()
+        #     raise HTTPException(status_code=404, detail="Authentication not found")
+        # else:
+        #     if hasattr(query, 'email_user_auth'):
+        #         setattr(query, 'email_user_auth', auth_email)
+        #
+        # auth_model_out = AuthenticationModelOut(
+        #     id_auth=query.id_auth,
+        #     auth_password=query.password_auth,
+        #     auth_email_user=auth_email,
+        #     auth_user_id=query.user_id,
+        #     auth_disabled=query.disabled_auth,
+        #     code_valid=query.code_valid
+        # )
+        # try:
+        #     session.commit()
+        #     session.close()
+        # except IntegrityError:
+        #     session.rollback()
+        #     raise HTTPException(status_code=400,
+        #                         detail=f"There is already a authentication with the email: {auth_email}")
+        # return auth_model_out
+        pass
 
     @staticmethod
     async def get_all_auths() -> List[AuthenticationModelOut]:
@@ -133,25 +134,26 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
 
     @staticmethod
     async def activate_account(activate_data: ActivateAccountModel) -> None:
-        query = session.query(AuthenticationEntity).where(AuthenticationEntity.id_auth == activate_data.auth_id
-                                                          and AuthenticationEntity.code_valid == activate_data.code
-                                                          ).first()
-        if not query:
-            session.commit()
-            session.close()
-            raise HTTPException(status_code=404, detail="Code error")
-        else:
-            if hasattr(query, 'disabled_auth'):
-                setattr(query, 'disabled_auth', False)
-                raise HTTPException(status_code=200, detail="Account active")
-
-        try:
-            session.commit()
-            session.close()
-        except IntegrityError:
-            session.rollback()
-            raise HTTPException(status_code=400,
-                                detail=f"Error in activating the account")
+        # query = session.query(AuthenticationEntity).where(AuthenticationEntity.id_auth == activate_data.auth_id
+        #                                                   and AuthenticationEntity.code_valid == activate_data.code
+        #                                                   ).first()
+        # if not query:
+        #     session.commit()
+        #     session.close()
+        #     raise HTTPException(status_code=404, detail="Code error")
+        # else:
+        #     if hasattr(query, 'disabled_auth'):
+        #         setattr(query, 'disabled_auth', False)
+        #         raise HTTPException(status_code=200, detail="Account active")
+        #
+        # try:
+        #     session.commit()
+        #     session.close()
+        # except IntegrityError:
+        #     session.rollback()
+        #     raise HTTPException(status_code=400,
+        #                         detail=f"Error in activating the account")
+        pass
 
     @staticmethod
     async def send_email(data_user: AuthenticationModelOut, name_user: str) -> None:
