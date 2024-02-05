@@ -30,7 +30,7 @@ class UserRepositoryAdapter(UserRepository, ABC):
             connection.rollback()
             print(error)
             raise HTTPException(status_code=400,
-                                detail=f"There is already a user: {error}")
+                                detail=f"Error: {error}")
         print(data_query)
         if data_query[0][0] is False:
             raise HTTPException(status_code=400,
@@ -245,7 +245,29 @@ class UserRepositoryAdapter(UserRepository, ABC):
         pass
 
     @staticmethod
-    async def count_users() -> int:
+    async def count_home() -> dict:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM agro_web.data_home()")
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"Error: {error}")
+
+        print(data_query)
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
+        return {
+            'count_users': data_query[0][1],
+            'count_harvests': data_query[0][2],
+            'count_municipalities': data_query[0][3],
+            'count_hectares': data_query[0][4]
+        }
         # count_users = session.query(UserEntity).count()
         # return count_users
-        pass
