@@ -1,10 +1,14 @@
 from abc import ABC
 from typing import List
+import json
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from src.domain.repositories.user_repository import (UserRepository, UserModelOut, UserModelOut2,
                                                      UserModelAuthIn, UserModelIn, UserModelAuthOut)
 from src.infrastructure.adapters.data_sources.db_config import get_db_connection, psycopg2
+
+
+connection = get_db_connection()
 
 
 class UserRepositoryAdapter(UserRepository, ABC):
@@ -13,33 +17,39 @@ class UserRepositoryAdapter(UserRepository, ABC):
     async def add_user(user_auth_in: UserModelAuthIn) -> UserModelAuthOut:
         data_query = ()
         try:
-            cursor = get_db_connection().cursor()
+            cursor = connection.cursor()
             cursor.execute("SELECT * FROM agro_web.create_user_agroweb(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                            (user_auth_in.name_user, user_auth_in.lastname_user, user_auth_in.email_user,
                             user_auth_in.phone_user, user_auth_in.id_document_user, user_auth_in.birthdate_user,
                             user_auth_in.type_document_id, user_auth_in.gender_id, user_auth_in.municipality_id,
                             user_auth_in.auth_password, user_auth_in.code_valid))
             data_query = cursor.fetchall()
-            cursor.commit()
+            connection.commit()
             cursor.close()
         except psycopg2.DatabaseError as error:
-            get_db_connection().rollback()
+            connection.rollback()
             print(error)
             raise HTTPException(status_code=400,
                                 detail=f"There is already a user: {error}")
-
         print(data_query)
+        if int(data_query[0][0]) == 0:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB")
+        response_json = json.loads(data_query[0][2])
         return UserModelAuthOut(
-            # name_user=user_auth_in.name_user,
-            # lastname_user=user_auth_in.lastname_user,
-            # email_user=user_auth_in.email_user,
-            # phone_user=user_auth_in.phone_user,
-            # id_document_user=user_auth_in.id_document_user,
-            # birthdate_user=user_auth_in.birthdate_user,
-            # type_document_id=user_auth_in.type_document_id,
-            # gender_id=user_auth_in.gender_id,
-            # municipality_id=user_auth_in.municipality_id,
-            # user_id=data_query.
+            name_user=user_auth_in.name_user,
+            lastname_user=user_auth_in.lastname_user,
+            email_user=user_auth_in.email_user,
+            phone_user=user_auth_in.phone_user,
+            id_document_user=user_auth_in.id_document_user,
+            birthdate_user=user_auth_in.birthdate_user,
+            type_document_id=user_auth_in.type_document_id,
+            gender_id=user_auth_in.gender_id,
+            municipality_id=user_auth_in.municipality_id,
+            auth_password=user_auth_in.auth_password,
+            code_valid=user_auth_in.code_valid,
+            id_user=response_json['id_user'],
+            id_auth=response_json['id_auth']
         )
 
         # new_user = UserEntity(name_user=user.name_user, lastname_user=user.lastname_user, email_user=user.email_user,

@@ -25,7 +25,7 @@ class UserModelOut(UserModelIn):
     id_user: int
 
 
-class UserModelAuthOut(UserModelIn):
+class UserModelAuthOut(UserModelAuthIn):
     id_user: int
     id_auth: int
 

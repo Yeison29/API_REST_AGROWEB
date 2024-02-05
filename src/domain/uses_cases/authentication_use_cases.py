@@ -16,21 +16,6 @@ password_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 class AuthenticationUseCase:
 
     @staticmethod
-    async def add_auth(user_id: int, auth_email_user: str, auth: AuthenticationModel, name_user: str) -> AuthenticationModelOut:
-        # password_hashed = password_context.hash(auth.auth_password)
-        # code = secrets.token_hex(2)[:4]
-        auth_in = AuthenticationModelIn(
-            auth_password=password_hashed,
-            auth_email_user=auth_email_user,
-            auth_user_id=user_id,
-            auth_disabled=True,
-            code_valid=code
-        )
-        response = await auth_repository.add_auth(auth_in)
-        await AuthenticationUseCase.send_email(response, name_user)
-        return response
-
-    @staticmethod
     async def authenticate_user(plane_password: str, email_user: str) -> TokenModel:
         auth = await auth_repository.get_auth_by_email(email_user)
         if not password_context.verify(plane_password, auth.auth_password):

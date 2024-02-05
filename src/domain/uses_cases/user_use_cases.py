@@ -2,7 +2,7 @@ from typing import List
 from src.infrastructure.adapters.user_repository_adapter import (UserRepositoryAdapter, UserModelOut, UserModelIn,
                                                                  UserModelAuthIn)
 from src.domain.uses_cases.authentication_use_cases import (AuthenticationUseCase, AuthenticationModel,
-                                                            AuthenticationRepositoryAdapter)
+                                                            AuthenticationRepositoryAdapter, AuthenticationModelOut)
 from passlib.context import CryptContext
 import secrets
 
@@ -33,7 +33,28 @@ class UserUseCase:
         # response = await auth_repository.add_auth(auth_in)
         # await AuthenticationUseCase.send_email(response, name_user)
         user_db = await user_repository.add_user(user_auth_in)
-        await AuthenticationUseCase.add_auth(user_db.id_user, user_db.email_user, auth, user_db.name_user)
+        auth_model_out = AuthenticationModelOut(
+            id_auth=user_db.id_auth,
+            auth_email_user=user_db.email_user,
+            auth_password=user_db.auth_password,
+            auth_disabled=True,
+            auth_user_id=user_db.id_user,
+            code_valid=user_db.code_valid
+        )
+        await AuthenticationUseCase.send_email(auth_model_out, user_db.name_user)
+        auth_model_out = None
+        user_db = UserModelOut(
+            name_user=user_db.name_user,
+            lastname_user=user_db.lastname_user,
+            email_user=user_db.email_user,
+            phone_user=user_db.phone_user,
+            id_document_user=user_db.id_document_user,
+            birthdate_user=user_db.birthdate_user,
+            type_document_id=user_db.type_document_id,
+            gender_id=user_db.gender_id,
+            municipality_id=user_db.municipality_id,
+            id_user=user_db.id_user
+        )
         return user_db
 
     @staticmethod
