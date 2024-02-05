@@ -45,8 +45,8 @@ class CropUseCase:
             return delete_crop
 
     @staticmethod
-    async def get_all_crops_harvest_by_id(harvest_id: int) -> List[CropModelOut]:
-        crops = await crop_repository.get_all_crops_harvest_by_id(harvest_id)
+    async def get_all_crops_harvest_by_id(harvest_id: int, user_id: int) -> List[CropModelOut]:
+        crops = await crop_repository.get_all_crops_harvest_by_id(harvest_id, user_id)
         return crops
 
     @staticmethod

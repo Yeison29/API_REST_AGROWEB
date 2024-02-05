@@ -234,8 +234,8 @@ class ApiRest:
         return response
 
     @staticmethod
-    async def weeks_statisticas(harvest_id: int, token: str = Depends(oauth2_scheme)):
-        response = await WeeksStatisticsUseCase.get_future_weeks_harvesting(harvest_id, token)
+    async def weeks_statisticas(harvest_id: int, user_id: int, token: str = Depends(oauth2_scheme)):
+        response = await WeeksStatisticsUseCase.get_future_weeks_harvesting(harvest_id, user_id, token)
         return response
 
     @staticmethod
