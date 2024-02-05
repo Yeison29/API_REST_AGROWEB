@@ -7,13 +7,14 @@ from jose import jwt, JWTError
 from fastapi_mail import FastMail, MessageSchema, MessageType
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
-
+from src.infrastructure.adapters.data_sources.db_config import get_db_connection, psycopg2
 from src.domain.repositories.authentication_repository import (AuthenticationRepository, AuthenticationModelOut,
                                                                AuthenticationModelIn, ActivateAccountModel,
                                                                AuthenticationModelOutToken)
 from src.infrastructure.adapters.data_sources.email_config import conf
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
+connection = get_db_connection()
 
 
 class AuthenticationRepositoryAdapter(AuthenticationRepository):
@@ -134,6 +135,24 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
 
     @staticmethod
     async def activate_account(activate_data: ActivateAccountModel) -> None:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM agro_web.activate_account(%s, %s)",
+                           (activate_data.auth_id, activate_data.code))
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"There is already a user: {error}")
+        print(data_query)
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][2]}'")
+
         # query = session.query(AuthenticationEntity).where(AuthenticationEntity.id_auth == activate_data.auth_id
         #                                                   and AuthenticationEntity.code_valid == activate_data.code
         #                                                   ).first()
@@ -165,13 +184,13 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
             Estamos deseando que empieces. Primero tienes que confirmar tu cuenta. Haz clic en el botón de
               abajo.</p>
           </div>
-          <a href="http://localhost:4200/activate/{data_user.id_auth}+{data_user.code_valid}" class="btn"
+          <a href="http://127.0.0.1:8000/api/activate/{data_user.id_auth}+{data_user.code_valid}" class="btn"
             style="text-decoration: none; color: #fff; background-color: rgba(1,125,63,1); padding: 20px; cursor: pointer; border-radius: 10px;">Click
             para activar</a>
           <div style="margin: 5%;">
             <p style="color: black;">Si no puedes hacer clic en el enlace, cópialo y pégalo en la barra de direcciones de tu
               navegador.</p>
-            <a href="http://localhost:4200/activate/{data_user.id_auth}+{data_user.code_valid}">http://localhost:4200/activate/{data_user.id_auth}+{data_user.code_valid}</a>
+            <a href="http://127.0.0.1:8000/api/activate/{data_user.id_auth}+{data_user.code_valid}">http://127.0.0.1:8000/api/activate/{data_user.id_auth}+{data_user.code_valid}</a>
           </div>
           <p>Una vez que hayas completado estos pasos, tu registro estará confirmado y podrás acceder a todos los servicios de
             <span style="color: rgba(1,125,63,1);">AGRO</span>-<span style="color: rgb(241, 207, 105);">WEB</span></p>

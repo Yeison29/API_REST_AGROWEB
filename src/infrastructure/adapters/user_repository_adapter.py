@@ -32,9 +32,9 @@ class UserRepositoryAdapter(UserRepository, ABC):
             raise HTTPException(status_code=400,
                                 detail=f"There is already a user: {error}")
         print(data_query)
-        if int(data_query[0][0]) == 0:
+        if data_query[0][0] is False:
             raise HTTPException(status_code=400,
-                                detail=f"Transaction error in DB")
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
         response_json = json.loads(data_query[0][2])
         return UserModelAuthOut(
             name_user=user_auth_in.name_user,
