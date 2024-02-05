@@ -4,7 +4,6 @@ from typing import Optional
 
 class MunicipalityModelIn(BaseModel):
     name_municipality: str
-    code_municipality: str
     department_id: int
 
 

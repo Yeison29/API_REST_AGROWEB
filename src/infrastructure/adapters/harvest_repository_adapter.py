@@ -2,6 +2,10 @@ from typing import List
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from src.domain.repositories.harvest_repository import HarvestRepository, HarvestModelIn, HarvestModelOut
+from src.infrastructure.adapters.data_sources.db_config import get_db_connection, psycopg2
+import json
+
+connection = get_db_connection()
 
 
 class HarvestRepositoryAdapter(HarvestRepository):
@@ -73,6 +77,33 @@ class HarvestRepositoryAdapter(HarvestRepository):
 
     @staticmethod
     async def get_all_harvests() -> List[HarvestModelOut]:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM agro_web.get_all_harvests()")
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"Error: {error}")
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
+        if data_query[0][2] is not None:
+            response_json = json.loads(data_query[0][2])
+            return [
+                HarvestModelOut(
+                    name_harvest=item.get("name_harvest"),
+                    code_harvest=item.get("code_harvest"),
+                    id_harvest=item.get("id_harvest")
+                )
+                for item in response_json
+            ]
+        else:
+            return []
         # query = session.query(HarvestEntity).all()
         # harvests_model_out_list = [
         #     HarvestModelOut(

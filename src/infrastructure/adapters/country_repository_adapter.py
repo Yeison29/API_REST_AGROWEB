@@ -2,7 +2,10 @@ from typing import List
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from src.domain.repositories.country_repository import CountryRepository, CountryModelIn, CountryModelOut
+from src.infrastructure.adapters.data_sources.db_config import get_db_connection, psycopg2
+import json
 
+connection = get_db_connection()
 
 class CountryRepositoryAdapter(CountryRepository):
 
@@ -73,6 +76,33 @@ class CountryRepositoryAdapter(CountryRepository):
 
     @staticmethod
     async def get_all_countries() -> List[CountryModelOut]:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM agro_web.get_all_countries()")
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"Error: {error}")
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
+        if data_query[0][2] is not None:
+            response_json = json.loads(data_query[0][2])
+            return [
+                CountryModelOut(
+                    name_country=item.get("name_country"),
+                    code_country=item.get("code_country"),
+                    id_country=item.get("id_country")
+                )
+                for item in response_json
+            ]
+        else:
+            return []
         # query = session.query(CountryEntity).all()
         # countries_model_out_list = [
         #     CountryModelOut(

@@ -2,6 +2,10 @@ from typing import List
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from src.domain.repositories.department_repository import DepartmentRepository, DepartmentModelOut, DepartmentModelIn
+from src.infrastructure.adapters.data_sources.db_config import get_db_connection, psycopg2
+import json
+
+connection = get_db_connection()
 
 
 class DepartmentRepositoryAdapter(DepartmentRepository):
@@ -77,6 +81,38 @@ class DepartmentRepositoryAdapter(DepartmentRepository):
 
     @staticmethod
     async def get_all_departments(id_country: int) -> List[DepartmentModelOut]:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute(
+                "SELECT * FROM agro_web.get_all_departments_by_country(%s)",
+                (id_country,)
+            )
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"Error: {error}")
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
+        if data_query[0][2] is not None:
+            response_json = json.loads(data_query[0][2])
+            return [
+                DepartmentModelOut(
+                    name_department=item.get("name_department"),
+                    code_department=item.get("code_department"),
+                    country_id=item.get("country_id"),
+                    id_department=item.get("id_department")
+                )
+                for item in response_json
+            ]
+        else:
+            return []
+
         # query = session.query(DepartmentEntity).where(DepartmentEntity.country_id == id_country).all()
         # departments_model_out_list = [
         #     DepartmentModelOut(

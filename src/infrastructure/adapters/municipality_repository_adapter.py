@@ -1,8 +1,11 @@
 from typing import List
 from fastapi import HTTPException
-from sqlalchemy.exc import IntegrityError
 from src.domain.repositories.municipality_repository import (MunicipalityRepository, MunicipalityModelOut,
                                                              MunicipalityModelIn)
+from src.infrastructure.adapters.data_sources.db_config import get_db_connection, psycopg2
+import json
+
+connection = get_db_connection()
 
 
 class MunicipalityRepositoryAdapter(MunicipalityRepository):
@@ -80,6 +83,38 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
 
     @staticmethod
     async def get_all_municipalities(id_department: int) -> List[MunicipalityModelOut]:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute(
+                "SELECT * FROM agro_web.get_all_municipalities_by_department(%s)",
+                (id_department,)
+            )
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"Error: {error}")
+        print(data_query)
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
+        if data_query[0][2] is not None:
+            response_json = json.loads(data_query[0][2])
+            return [
+                MunicipalityModelOut(
+                    name_municipality=item.get('name_municipality', ''),
+                    department_id=id_department,
+                    id_municipality=item.get('id_municipality', '')
+                )
+                for item in response_json
+            ]
+        else:
+            return []
+
         # query = session.query(MunicipalityEntity).where(MunicipalityEntity.department_id == id_department).all()
         # municipalities_model_out_list = [
         #     MunicipalityModelOut(
