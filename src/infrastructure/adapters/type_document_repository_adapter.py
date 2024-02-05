@@ -3,6 +3,10 @@ from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from src.domain.repositories.type_document_repository import (TypeDocumentRepository, TypeDocumentModelOut,
                                                               TypeDocumentModelIn)
+from src.infrastructure.adapters.data_sources.db_config import get_db_connection, psycopg2
+import json
+
+connection = get_db_connection()
 
 
 class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
@@ -77,6 +81,33 @@ class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
 
     @staticmethod
     async def get_all_type_documents() -> List[TypeDocumentModelOut]:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM agro_web.get_all_type_documents()")
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"Error: {error}")
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
+        if data_query[0][2] is not None:
+            response_json = json.loads(data_query[0][2])
+            return [
+                TypeDocumentModelOut(
+                    name_type_document=item.get("name_type_document"),
+                    code_type_document=item.get("code_type_document"),
+                    id_type_document=item.get("id_type_document")
+                )
+                for item in response_json
+            ]
+        else:
+            return []
         # query = session.query(TypeDocumentEntity).all()
         # type_documents_model_out_list = [
         #     TypeDocumentModelOut(

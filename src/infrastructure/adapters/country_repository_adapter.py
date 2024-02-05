@@ -7,6 +7,7 @@ import json
 
 connection = get_db_connection()
 
+
 class CountryRepositoryAdapter(CountryRepository):
 
     @staticmethod
