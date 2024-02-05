@@ -42,5 +42,5 @@ class UserRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def count_user() -> int:
+    async def count_home() -> int:
         pass

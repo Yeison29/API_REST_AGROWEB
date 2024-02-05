@@ -97,6 +97,6 @@ class UserUseCase:
         return ages
 
     @staticmethod
-    async def count_users() -> int:
-        count_users = await user_repository.count_users()
-        return count_users
+    async def count_home() -> dict:
+        count_home = await user_repository.count_home()
+        return count_home

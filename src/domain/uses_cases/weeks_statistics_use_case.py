@@ -196,13 +196,10 @@ class WeeksStatisticsUseCase:
 
     @staticmethod
     async def home() -> dict:
-        count_users = await UserUseCase.count_users()
-        count_harvests = await HarvestUseCase.count_harvests()
-        count_municipalities = await MunicipalityUseCase.count_municipalities()
-        count_hectares = await CropUseCase.count_hectares()
+        count_home = await UserUseCase.count_home()
         return {
-            'count_users': count_users,
-            'count_harvests': count_harvests,
-            'count_municipalities': count_municipalities,
-            'count_hectares': round(count_hectares, 2)
+            'count_users': count_home['count_users'],
+            'count_harvests': count_home['count_harvests'],
+            'count_municipalities': count_home['count_municipalities'],
+            'count_hectares': round(count_home['count_hectares'], 2)
         }

@@ -1,72 +1,53 @@
+from abc import ABC
 from typing import List, Union
 from fastapi import HTTPException
-from sqlalchemy.exc import IntegrityError
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from fastapi_mail import FastMail, MessageSchema, MessageType
-from sqlalchemy.future import select
-from sqlalchemy.orm import joinedload
 from src.infrastructure.adapters.data_sources.db_config import get_db_connection, psycopg2
 from src.domain.repositories.authentication_repository import (AuthenticationRepository, AuthenticationModelOut,
                                                                AuthenticationModelIn, ActivateAccountModel,
                                                                AuthenticationModelOutToken)
 from src.infrastructure.adapters.data_sources.email_config import conf
+from src.infrastructure.adapters.data_sources.db_config import secret_key, algorithm
+import json
 
 oauth2_scheme = OAuth2PasswordBearer("/token")
 connection = get_db_connection()
 
 
-class AuthenticationRepositoryAdapter(AuthenticationRepository):
-
-    @staticmethod
-    async def add_auth(auth: AuthenticationModelIn) -> AuthenticationModelOut:
-        # new_auth = AuthenticationEntity(email_user_auth=auth.auth_email_user, password_auth=auth.auth_password,
-        #                                 disabled_auth=auth.auth_disabled, user_id=auth.auth_user_id,
-        #                                 code_valid=auth.code_valid)
-        # session.add(new_auth)
-        # session.commit()
-        # session.refresh(new_auth)
-        # session.close()
-        # auth_model_out = AuthenticationModelOut(
-        #     id_auth=new_auth.id_auth,
-        #     auth_email_user=new_auth.email_user_auth,
-        #     auth_password=new_auth.password_auth,
-        #     auth_disabled=new_auth.disabled_auth,
-        #     auth_user_id=new_auth.user_id,
-        #     code_valid=new_auth.code_valid
-        # )
-        # return auth_model_out
-        pass
+class AuthenticationRepositoryAdapter(AuthenticationRepository, ABC):
 
     @staticmethod
     async def get_auth_by_email(email_user: str) -> AuthenticationModelOutToken:
-        #query = session.query(AuthenticationEntity).join(UserEntity).filter(AuthenticationEntity.email_user_auth == email_user).first()
-        # stmt = (
-        #     select(AuthenticationEntity, UserEntity.name_user)
-        #     .join(UserEntity, AuthenticationEntity.user_id == UserEntity.id_user)
-        #     .where(AuthenticationEntity.email_user_auth == email_user)
-        # )
-        # query = session.execute(stmt).first()
-        # if not query:
-        #     session.commit()
-        #     session.close()
-        #     raise HTTPException(status_code=401, detail="Could not validate credentials",
-        #                         headers={"WWW-Authenticate": "Bearer"})
-        # else:
-        #     auth_model_out = AuthenticationModelOutToken(
-        #         id_auth=query[0].id_auth,
-        #         auth_password=query[0].password_auth,
-        #         auth_email_user=query[0].email_user_auth,
-        #         auth_user_id=query[0].user_id,
-        #         auth_disabled=query[0].disabled_auth,
-        #         code_valid=query[0].code_valid,
-        #         name_user=query.name_user
-        #     )
-        #     session.commit()
-        #     session.close()
-        #     return auth_model_out
-        pass
+        data_query = ()
+        print(email_user)
+        try:
+            cursor = connection.cursor()
+            cursor.execute(f"SELECT * FROM agro_web.get_auth_by_email(%s)", (email_user,))
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"Error: '{data_query[0][2]}'")
+        print(data_query)
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][2]}'")
+        response_json = json.loads(data_query[0][1])
+        return AuthenticationModelOutToken(
+            id_auth=response_json['id_auth'],
+            auth_password=response_json['auth_password'],
+            auth_email_user=response_json['auth_email'],
+            auth_user_id=response_json['user_id'],
+            auth_disabled=response_json['disabled_auth'],
+            code_valid=response_json['code_valid'],
+            name_user=response_json['name_user']
+        )
 
     @staticmethod
     async def update_auth(id_user: int, auth_email: str) -> AuthenticationModelOut:
