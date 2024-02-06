@@ -23,7 +23,7 @@ class CropRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def get_all_crops(user_id: int) -> List[CropModelOut2]:
+    async def get_all_crops(user_id: int, user_login: int) -> List[CropModelOut2]:
         pass
 
     @staticmethod

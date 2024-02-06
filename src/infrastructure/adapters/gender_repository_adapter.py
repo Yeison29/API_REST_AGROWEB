@@ -2,6 +2,10 @@ from typing import List
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from src.domain.repositories.gender_repository import GenderRepository, GenderModelIn, GenderModelOut
+from src.infrastructure.adapters.data_sources.db_config import get_db_connection, psycopg2
+import json
+
+connection = get_db_connection()
 
 
 
@@ -74,6 +78,35 @@ class GenderRepositoryAdapter(GenderRepository):
 
     @staticmethod
     async def get_all_genders() -> List[GenderModelOut]:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute(
+                "SELECT * FROM agro_web.get_all_genders()"
+            )
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"Error: {error}")
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
+        if data_query[0][2] is not None:
+            response_json = json.loads(data_query[0][2])
+            return [
+                GenderModelOut(
+                    name_gender=item.get("name_gender"),
+                    code_gender=item.get("code_gender"),
+                    id_gender=item.get("id_gender")
+                )
+                for item in response_json
+            ]
+        else:
+            return []
         # query = session.query(GenderEntity).all()
         # genders_model_out_list = [
         #     GenderModelOut(

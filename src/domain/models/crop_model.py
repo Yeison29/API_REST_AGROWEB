@@ -21,7 +21,6 @@ class CropModelOut(CropModelIn):
 class CropModelOut2(CropModelOut):
     name_harvest: str
     code_harvest: str
-    id_harvest: int
 
 
 class CropModelUpdate(CropModelIn):

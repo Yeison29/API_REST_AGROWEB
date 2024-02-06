@@ -2,11 +2,44 @@ from typing import List
 from fastapi import HTTPException
 from src.domain.repositories.crop_repository import (CropRepository, CropModelIn, CropModelOut,
                                                      MunicipalityProductionModelOut, CropModelOut2)
+from src.infrastructure.adapters.data_sources.db_config import get_db_connection, psycopg2
+import json
+
+connection = get_db_connection()
 
 
 class CropRepositoryAdapter(CropRepository):
     @staticmethod
     async def add_crop(crop: CropModelIn) -> CropModelOut:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM agro_web.create_crop_agroweb(%s, %s, %s, %s, %s, %s)",
+                           (crop.hectares, crop.seed_time, crop.approximate_durability_date,
+                            crop.approximate_weeks_crop_durability, crop.harvest_id, crop.user_id))
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            connection.rollback()
+            print(error)
+            raise HTTPException(status_code=400,
+                                detail=f"Error: {error}")
+        print(data_query)
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
+        response_json = json.loads(data_query[0][2])
+        return CropModelOut(
+            hectares=crop.hectares,
+            seed_time=crop.seed_time,
+            approximate_durability_date=crop.approximate_durability_date,
+            approximate_weeks_crop_durability=crop.approximate_weeks_crop_durability,
+            harvest_id=crop.harvest_id,
+            user_id=crop.user_id,
+            id_crop=response_json["id_crop"],
+            activate=response_json["activate"]
+        )
         # new_crop = CropEntity(hectares=crop.hectares, seed_time=crop.seed_time,
         #                       approximate_durability_date=crop.approximate_durability_date,
         #                       approximate_weeks_crop_durability=crop.approximate_weeks_crop_durability,
@@ -86,7 +119,41 @@ class CropRepositoryAdapter(CropRepository):
         pass
 
     @staticmethod
-    async def get_all_crops(user_id: int) -> List[CropModelOut2]:
+    async def get_all_crops(user_id: int, user_login: int) -> List[CropModelOut2]:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM agro_web.get_all_crops_by_user(%s, %s)", (user_id, user_login))
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"Error: {error}")
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
+        if data_query[0][2] is not None:
+            response_json = json.loads(data_query[0][2])
+            return [
+                CropModelOut2(
+                    hectares=item.get("hectares"),
+                    seed_time=item.get("seed_time"),
+                    approximate_durability_date=item.get("approximate_durability_date"),
+                    approximate_weeks_crop_durability=item.get("approximate_weeks_crop_durability"),
+                    harvest_id=item.get("harvest_id"),
+                    user_id=item.get("user_id"),
+                    id_crop=item.get("id_crop"),
+                    activate=item.get("activate"),
+                    name_harvest=item.get("name_harvest"),
+                    code_harvest=item.get("code_harvest")
+                )
+                for item in response_json
+            ]
+        else:
+            return []
         # query = (
         #     session.query(CropEntity, HarvestEntity)
         #     .join(HarvestEntity, HarvestEntity.id_harvest == CropEntity.harvest_id)

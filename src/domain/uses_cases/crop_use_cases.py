@@ -31,10 +31,10 @@ class CropUseCase:
             return updated_crop
 
     @staticmethod
-    async def get_all_crops(user_id: int, token: str) -> List[CropModelOut2]:
+    async def get_all_crops(user_id: int, user_login: int, token: str) -> List[CropModelOut2]:
         validate_token = await AuthenticationUseCase.get_user_current(token)
         if validate_token is True:
-            crops = await crop_repository.get_all_crops(user_id)
+            crops = await crop_repository.get_all_crops(user_id, user_login)
             return crops
 
     @staticmethod
