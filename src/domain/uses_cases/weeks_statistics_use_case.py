@@ -16,10 +16,10 @@ time_zone = pytz.timezone('America/Bogota')
 
 class WeeksStatisticsUseCase:
     @staticmethod
-    async def get_future_weeks_harvesting(harvest_id: int, token: str) -> List[dict]:
+    async def get_future_weeks_harvesting(harvest_id: int, user_id: int, token: str) -> List[dict]:
         validate_token = await AuthenticationUseCase.get_user_current(token)
         if validate_token is True:
-            crops = await CropUseCase.get_all_crops_harvest_by_id(harvest_id)
+            crops = await CropUseCase.get_all_crops_harvest_by_id(harvest_id, user_id)
             weeks_model_list = [
                 WeeksStatisticsModel(
                     initial_week=await WeeksStatisticsUseCase.get_number_week(
@@ -105,6 +105,9 @@ class WeeksStatisticsUseCase:
 
     @staticmethod
     async def purge_data_weeks(data: List[WeeksStatisticsModel]) -> List[dict]:
+        if len(data) == 0:
+            return []
+
         weeks_list = [week for item in data for week in item.weeks]
         df = pd.DataFrame([model.__dict__ for model in weeks_list])
         print(df)

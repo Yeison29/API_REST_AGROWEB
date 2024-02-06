@@ -33,7 +33,7 @@ class CropRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def get_all_crops_harvest_by_id(harvest_id: int) -> List[CropModelOut]:
+    async def get_all_crops_harvest_by_id(harvest_id: int, user_id: int) -> List[CropModelOut]:
         pass
 
     @staticmethod

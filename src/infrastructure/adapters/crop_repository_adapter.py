@@ -196,7 +196,43 @@ class CropRepositoryAdapter(CropRepository):
         pass
 
     @staticmethod
-    async def get_all_crops_harvest_by_id(harvest_id: int) -> List[CropModelOut]:
+    async def get_all_crops_harvest_by_id(harvest_id: int, user_id: int) -> List[CropModelOut]:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute(
+                "SELECT * FROM agro_web.get_all_crops_harvest_by_id(%s, %s)",
+                (harvest_id, user_id)
+            )
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"Error: {error}")
+        print(data_query)
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
+        if data_query[0][2] is not None:
+            response_json = json.loads(data_query[0][2])
+            return [
+                CropModelOut(
+                    id_crop=q.id_crop,
+                    hectares=q.hectares,
+                    seed_time=q.seed_time,
+                    approximate_durability_date=q.approximate_durability_date,
+                    approximate_weeks_crop_durability=q.approximate_weeks_crop_durability,
+                    activate=q.activate,
+                    harvest_id=q.harvest_id,
+                    user_id=q.user_id
+                )
+                for q in response_json
+            ]
+        else:
+            return []
         # query = session.query(CropEntity).where(CropEntity.harvest_id == harvest_id, CropEntity.activate).all()
         # if not query:
         #     session.commit()
