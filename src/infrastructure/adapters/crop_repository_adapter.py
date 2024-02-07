@@ -119,11 +119,11 @@ class CropRepositoryAdapter(CropRepository):
         pass
 
     @staticmethod
-    async def get_all_crops(user_id: int, user_login: int) -> List[CropModelOut2]:
+    async def get_all_crops(user_id: int) -> List[CropModelOut2]:
         data_query = ()
         try:
             cursor = connection.cursor()
-            cursor.execute("SELECT * FROM agro_web.get_all_crops_by_user(%s, %s)", (user_id, user_login))
+            cursor.execute("SELECT * FROM agro_web.get_all_crops_by_user(%s)", (user_id,))
             data_query = cursor.fetchall()
             connection.commit()
             cursor.close()
@@ -220,14 +220,14 @@ class CropRepositoryAdapter(CropRepository):
             response_json = json.loads(data_query[0][2])
             return [
                 CropModelOut(
-                    id_crop=q.id_crop,
-                    hectares=q.hectares,
-                    seed_time=q.seed_time,
-                    approximate_durability_date=q.approximate_durability_date,
-                    approximate_weeks_crop_durability=q.approximate_weeks_crop_durability,
-                    activate=q.activate,
-                    harvest_id=q.harvest_id,
-                    user_id=q.user_id
+                    id_crop=q.get('id_crop'),
+                    hectares=q.get('hectares'),
+                    seed_time=q.get('seed_time'),
+                    approximate_durability_date=q.get('approximate_durability_date'),
+                    approximate_weeks_crop_durability=q.get('approximate_weeks_crop_durability'),
+                    activate=q.get('activate'),
+                    harvest_id=q.get('harvest_id'),
+                    user_id=q.get('user_id')
                 )
                 for q in response_json
             ]
@@ -258,7 +258,40 @@ class CropRepositoryAdapter(CropRepository):
         pass
 
     @staticmethod
-    async def get_all_crops_past() -> List[MunicipalityProductionModelOut]:
+    async def get_all_crops_past(user_login: int) -> List[MunicipalityProductionModelOut]:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute(
+                "SELECT * FROM agro_web.get_most_planted_crop_by_municipality(%s)",
+                (user_login,)
+            )
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"Error: {error}")
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
+        if data_query[0][2] is not None:
+            response_json = json.loads(data_query[0][2])
+            return [
+                MunicipalityProductionModelOut(
+                    name_municipality=item.get('name_municipality'),
+                    municipality_id=item.get('id_municipality'),
+                    harvest_id=item.get('id_harvest'),
+                    code_harvest=item.get('code_harvest'),
+                    name_harvest=item.get('name_harvest'),
+                    total_hectares=item.get('hectares')
+                )
+                for item in response_json
+            ]
+        else:
+            return []
         # query = (
         #     session.query(CropEntity, UserEntity, MunicipalityEntity, HarvestEntity)
         #     .join(UserEntity, CropEntity.user_id == UserEntity.id_user)
@@ -290,7 +323,44 @@ class CropRepositoryAdapter(CropRepository):
         pass
 
     @staticmethod
-    async def get_most_widely_planted_crops() -> List[CropModelOut2]:
+    async def get_most_widely_planted_crops(user_login: int) -> List[CropModelOut2]:
+        data_query = ()
+        try:
+            cursor = connection.cursor()
+            cursor.execute(
+                "SELECT * FROM agro_web.get_most_widely_planted_crops(%s)",
+                (user_login,)
+            )
+            data_query = cursor.fetchall()
+            connection.commit()
+            cursor.close()
+        except psycopg2.DatabaseError as error:
+            print(error)
+            connection.rollback()
+            raise HTTPException(status_code=400,
+                                detail=f"Error: {error}")
+        if data_query[0][0] is False:
+            raise HTTPException(status_code=400,
+                                detail=f"Transaction error in DB: '{data_query[0][1]}'")
+        if data_query[0][2] is not None:
+            response_json = json.loads(data_query[0][2])
+            return [
+                CropModelOut2(
+                    hectares=item.get("hectares"),
+                    seed_time=item.get("seed_time"),
+                    approximate_durability_date=item.get("approximate_durability_date"),
+                    approximate_weeks_crop_durability=item.get("approximate_weeks_crop_durability"),
+                    harvest_id=item.get("harvest_id"),
+                    user_id=item.get("user_id"),
+                    id_crop=item.get("id_crop"),
+                    activate=item.get("activate"),
+                    name_harvest=item.get("name_harvest"),
+                    code_harvest=item.get("code_harvest")
+                )
+                for item in response_json
+            ]
+        else:
+            return []
         # query = (
         #     session.query(CropEntity, HarvestEntity)
         #     .join(HarvestEntity, CropEntity.harvest_id == HarvestEntity.id_harvest)

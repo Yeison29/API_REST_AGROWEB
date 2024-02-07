@@ -38,12 +38,12 @@ class CropRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def get_all_crops_past() -> List[MunicipalityProductionModelOut]:
+    async def get_all_crops_past(user_login: int) -> List[MunicipalityProductionModelOut]:
         pass
 
     @staticmethod
     @abstractmethod
-    async def get_most_widely_planted_crops() -> List[CropModelOut2]:
+    async def get_most_widely_planted_crops(user_login: int) -> List[CropModelOut2]:
         pass
 
     @staticmethod

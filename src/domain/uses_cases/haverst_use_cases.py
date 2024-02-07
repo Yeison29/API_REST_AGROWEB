@@ -30,10 +30,10 @@ class HarvestUseCase:
             return updated_harvest
 
     @staticmethod
-    async def get_all_harvests(token: str) -> List[HarvestModelOut]:
+    async def get_all_harvests(user_login: int, token: str) -> List[HarvestModelOut]:
         validate_token = await AuthenticationUseCase.get_user_current(token)
         if validate_token is True:
-            harvests = await harvest_repository.get_all_harvests()
+            harvests = await harvest_repository.get_all_harvests(user_login)
             return harvests
 
     @staticmethod

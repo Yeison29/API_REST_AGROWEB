@@ -117,7 +117,7 @@ class WeeksStatisticsUseCase:
         df_sorted["start_date"] = df_sorted.apply(lambda row: datetime.strptime(f"{int(row['initial_year'])} "
                                                                                 f"{int(row['week'])} 7", "%G %V %u"),
                                                   axis=1)
-        start_date = datetime.now() - timedelta(days=7)
+        start_date = datetime.now()
         end_date = df_sorted["start_date"].max() + timedelta(days=7)
         date_range = pd.date_range(start_date, end_date, freq="W-Mon")
         all_weeks_df = pd.DataFrame(date_range, columns=["start_date"])
@@ -135,10 +135,10 @@ class WeeksStatisticsUseCase:
         return dict_from_df
 
     @staticmethod
-    async def get_most_planted_crop_by_municipality(token: str) -> List[dict]:
+    async def get_most_planted_crop_by_municipality(token: str, user_login: int) -> List[dict]:
         validate_token = await AuthenticationUseCase.get_user_current(token)
         if validate_token is True:
-            crops = await CropUseCase.get_most_planted_crop_by_municipality()
+            crops = await CropUseCase.get_most_planted_crop_by_municipality(user_login)
             response = await WeeksStatisticsUseCase.purge_data_municipality_production(crops)
             return response
 
@@ -146,7 +146,7 @@ class WeeksStatisticsUseCase:
     async def purge_data_municipality_production(data: List[MunicipalityProductionModelOut]) -> List[dict]:
         df = pd.DataFrame([model.__dict__ for model in data])
         print(df)
-        df_group = (df.groupby(['municipality_id', 'code_municipality', 'name_municipality', 'harvest_id',
+        df_group = (df.groupby(['municipality_id', 'name_municipality', 'harvest_id',
                                 'name_harvest', 'code_harvest'])['total_hectares'].sum().
                     reset_index())
         print(df_group)
@@ -159,10 +159,10 @@ class WeeksStatisticsUseCase:
         return dict_from_df
 
     @staticmethod
-    async def most_widely_planted_crops(token: str) -> List[dict]:
+    async def most_widely_planted_crops(user_login: int, token: str) -> List[dict]:
         validate_token = await AuthenticationUseCase.get_user_current(token)
         if validate_token is True:
-            crops = await CropUseCase.get_most_widely_planted_crops()
+            crops = await CropUseCase.get_most_widely_planted_crops(user_login)
             df = pd.DataFrame([model.__dict__ for model in crops])
             df_group = (df.groupby(['harvest_id',
                                     'name_harvest', 'code_harvest'])['hectares'].sum().

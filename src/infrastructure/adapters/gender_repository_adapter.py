@@ -8,7 +8,6 @@ import json
 connection = get_db_connection()
 
 
-
 class GenderRepositoryAdapter(GenderRepository):
 
     @staticmethod

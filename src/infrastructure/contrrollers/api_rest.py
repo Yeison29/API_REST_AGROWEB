@@ -190,8 +190,7 @@ class ApiRest:
 
     @staticmethod
     async def get_all_crops(user_id: int, token: str = Depends(oauth2_scheme)):
-        user_login = 2
-        response = await crop_use_case.get_all_crops(user_id, user_login, token)
+        response = await crop_use_case.get_all_crops(user_id, token)
         return response
 
     @staticmethod
@@ -215,8 +214,8 @@ class ApiRest:
         return response
 
     @staticmethod
-    async def get_all_harvests(token: str = Depends(oauth2_scheme)):
-        response = await harvest_use_case.get_all_harvests(token)
+    async def get_all_harvests(user_login: int, token: str = Depends(oauth2_scheme)):
+        response = await harvest_use_case.get_all_harvests(user_login, token)
         return response
 
     @staticmethod
@@ -240,8 +239,8 @@ class ApiRest:
         return response
 
     @staticmethod
-    async def most_planted_crop_by_municipality(token: str = Depends(oauth2_scheme)):
-        response = await WeeksStatisticsUseCase.get_most_planted_crop_by_municipality(token)
+    async def most_planted_crop_by_municipality(user_login: int, token: str = Depends(oauth2_scheme)):
+        response = await WeeksStatisticsUseCase.get_most_planted_crop_by_municipality(token, user_login)
         return response
 
     @staticmethod
@@ -250,8 +249,8 @@ class ApiRest:
         return response
 
     @staticmethod
-    async def most_widely_planted_crops(token: str = Depends(oauth2_scheme)):
-        response = await WeeksStatisticsUseCase.most_widely_planted_crops(token)
+    async def most_widely_planted_crops(user_login: int, token: str = Depends(oauth2_scheme)):
+        response = await WeeksStatisticsUseCase.most_widely_planted_crops(user_login, token)
         return response
 
     @staticmethod

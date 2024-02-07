@@ -76,11 +76,11 @@ class HarvestRepositoryAdapter(HarvestRepository):
         pass
 
     @staticmethod
-    async def get_all_harvests() -> List[HarvestModelOut]:
+    async def get_all_harvests(user_login: int) -> List[HarvestModelOut]:
         data_query = ()
         try:
             cursor = connection.cursor()
-            cursor.execute("SELECT * FROM agro_web.get_all_harvests()")
+            cursor.execute("SELECT * FROM agro_web.get_all_harvests(%s)", (user_login,))
             data_query = cursor.fetchall()
             connection.commit()
             cursor.close()

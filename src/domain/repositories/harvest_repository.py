@@ -22,7 +22,7 @@ class HarvestRepository(ABC):
 
     @staticmethod
     @abstractmethod
-    async def get_all_harvests() -> List[HarvestModelOut]:
+    async def get_all_harvests(user_login: int) -> List[HarvestModelOut]:
         pass
 
     @staticmethod

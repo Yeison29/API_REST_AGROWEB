@@ -31,10 +31,10 @@ class CropUseCase:
             return updated_crop
 
     @staticmethod
-    async def get_all_crops(user_id: int, user_login: int, token: str) -> List[CropModelOut2]:
+    async def get_all_crops(user_id: int, token: str) -> List[CropModelOut2]:
         validate_token = await AuthenticationUseCase.get_user_current(token)
         if validate_token is True:
-            crops = await crop_repository.get_all_crops(user_id, user_login)
+            crops = await crop_repository.get_all_crops(user_id)
             return crops
 
     @staticmethod
@@ -50,13 +50,13 @@ class CropUseCase:
         return crops
 
     @staticmethod
-    async def get_most_planted_crop_by_municipality() -> List[MunicipalityProductionModelOut]:
-        crops = await crop_repository.get_all_crops_past()
+    async def get_most_planted_crop_by_municipality(user_login: int) -> List[MunicipalityProductionModelOut]:
+        crops = await crop_repository.get_all_crops_past(user_login)
         return crops
 
     @staticmethod
-    async def get_most_widely_planted_crops() -> List[CropModelOut2]:
-        crops = await crop_repository.get_most_widely_planted_crops()
+    async def get_most_widely_planted_crops(user_login: int) -> List[CropModelOut2]:
+        crops = await crop_repository.get_most_widely_planted_crops(user_login)
         return crops
 
     @staticmethod
