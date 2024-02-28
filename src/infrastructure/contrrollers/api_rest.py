@@ -163,8 +163,8 @@ class ApiRest:
         return response
 
     @staticmethod
-    async def get_all_municipalities(id_department: int):
-        response = await municipality_use_case.get_all_municipalities(id_department)
+    async def get_all_municipalities():
+        response = await municipality_use_case.get_all_municipalities()
         return response
 
     @staticmethod

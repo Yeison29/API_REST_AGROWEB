@@ -96,7 +96,7 @@ class ApiRouter:
             ApiRest.weeks_statisticas)
         self.router.get("/api/most-planted-crop-by-municipality", status_code=200, response_model=List[dict])(
             ApiRest.most_planted_crop_by_municipality)
-        self.router.put("/api/activate", status_code=200, response_model=None)(
+        self.router.get("/api/activate", status_code=200, response_model=None)(
             ApiRest.activate_account)
         self.router.get("/api/most-widely-planted-crops", status_code=200, response_model=List[dict])(
             ApiRest.most_widely_planted_crops)

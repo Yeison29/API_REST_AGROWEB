@@ -136,8 +136,7 @@ class UserRepositoryAdapter(UserRepository):
         query = (
             session.query(UserEntity, GenderEntity, AuthenticationEntity.disabled_auth)
             .join(GenderEntity, UserEntity.gender_id == GenderEntity.id_gender)
-            .filter(~AuthenticationEntity.disabled_auth)
-            .all()
+            .filter(~AuthenticationEntity.disabled_auth).all()
         )
         if not query:
             session.commit()
@@ -169,8 +168,7 @@ class UserRepositoryAdapter(UserRepository):
     async def age_range() -> List[UserModelOut]:
         query = (
             session.query(UserEntity, AuthenticationEntity.disabled_auth)
-            .filter(~AuthenticationEntity.disabled_auth)
-            .all()
+            .filter(~AuthenticationEntity.disabled_auth).all()
         )
         if not query:
             session.commit()

@@ -31,8 +31,8 @@ class MunicipalityUseCase:
             return updated_municipality
 
     @staticmethod
-    async def get_all_municipalities(id_department: int) -> List[MunicipalityModelOut]:
-        municipalities = await municipality_repository.get_all_municipalities(id_department)
+    async def get_all_municipalities() -> List[MunicipalityModelOut]:
+        municipalities = await municipality_repository.get_all_municipalities()
         return municipalities
 
     @staticmethod
