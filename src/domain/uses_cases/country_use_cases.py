@@ -26,7 +26,7 @@ class CountryUseCase:
     async def update_country(id_country: int, country_update: CountryModelIn,  token: str) -> CountryModelOut:
         validate_token = await AuthenticationUseCase.get_user_current(token)
         if validate_token is True:
-            updated_country = await country_repository.update_country(id_country, country_update)
+            updated_country = await update_country(id_country, country_update)
             return updated_country
 
     @staticmethod

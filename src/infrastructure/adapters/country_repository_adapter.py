@@ -45,32 +45,6 @@ class CountryRepositoryAdapter(CountryRepository):
             return country_model_out
 
     @staticmethod
-    async def update_country(id_country: int, country: CountryModelIn) -> CountryModelOut:
-        query = session.query(CountryEntity).where(CountryEntity.id_country == id_country).first()
-        if not query:
-            session.commit()
-            session.close()
-            raise HTTPException(status_code=404, detail="Country not found")
-        else:
-            if query:
-                for key, value in country.dict().items():
-                    setattr(query, key, value)
-
-        country_model_out = CountryModelOut(
-            id_country=id_country,
-            name_country=country.name_country,
-            code_country=country.code_country
-        )
-        try:
-            session.commit()
-            session.close()
-        except IntegrityError:
-            session.rollback()
-            raise HTTPException(status_code=400,
-                                detail=f"There is already a country with the code: {country.code_country}")
-        return country_model_out
-
-    @staticmethod
     async def get_all_countries() -> List[CountryModelOut]:
         query = session.query(CountryEntity).all()
         countries_model_out_list = [
@@ -98,3 +72,29 @@ class CountryRepositoryAdapter(CountryRepository):
             session.commit()
             session.close()
         return None
+
+
+async def update_country(id_country: int, country: CountryModelIn) -> CountryModelOut:
+    query = session.query(CountryEntity).where(CountryEntity.id_country == id_country).first()
+    if not query:
+        session.commit()
+        session.close()
+        raise HTTPException(status_code=404, detail="Country not found")
+    else:
+        if query:
+            for key, value in country.dict().items():
+                setattr(query, key, value)
+
+    country_model_out = CountryModelOut(
+        id_country=id_country,
+        name_country=country.name_country,
+        code_country=country.code_country
+    )
+    try:
+        session.commit()
+        session.close()
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(status_code=400,
+                            detail=f"There is already a country with the code: {country.code_country}")
+    return country_model_out
