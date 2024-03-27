@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import List
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
@@ -6,7 +7,7 @@ from src.infrastructure.adapters.data_sources.db_config import session
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (CountryEntity)
 
 
-class CountryRepositoryAdapter(CountryRepository):
+class CountryRepositoryAdapter(CountryRepository, ABC):
 
     @staticmethod
     async def add_country(country: CountryModelIn) -> CountryModelOut:
@@ -15,7 +16,6 @@ class CountryRepositoryAdapter(CountryRepository):
         try:
             session.commit()
             session.refresh(new_country)
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -32,7 +32,6 @@ class CountryRepositoryAdapter(CountryRepository):
         query = session.query(CountryEntity).where(CountryEntity.id_country == id_country).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Country not found")
         else:
             country_model_out = CountryModelOut(
@@ -41,7 +40,6 @@ class CountryRepositoryAdapter(CountryRepository):
                 code_country=query.code_country
             )
             session.commit()
-            session.close()
             return country_model_out
 
     @staticmethod
@@ -56,7 +54,6 @@ class CountryRepositoryAdapter(CountryRepository):
             for q in query
         ]
         session.commit()
-        session.close()
         return countries_model_out_list
 
     @staticmethod
@@ -64,13 +61,11 @@ class CountryRepositoryAdapter(CountryRepository):
         query = session.query(CountryEntity).where(CountryEntity.id_country == id_country).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Country not found")
         else:
             if query:
                 session.delete(query)
             session.commit()
-            session.close()
         return None
 
 
@@ -78,7 +73,6 @@ async def update_country(id_country: int, country: CountryModelIn) -> CountryMod
     query = session.query(CountryEntity).where(CountryEntity.id_country == id_country).first()
     if not query:
         session.commit()
-        session.close()
         raise HTTPException(status_code=404, detail="Country not found")
     else:
         if query:
@@ -92,7 +86,6 @@ async def update_country(id_country: int, country: CountryModelIn) -> CountryMod
     )
     try:
         session.commit()
-        session.close()
     except IntegrityError:
         session.rollback()
         raise HTTPException(status_code=400,
