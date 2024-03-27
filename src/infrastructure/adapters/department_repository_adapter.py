@@ -16,7 +16,6 @@ class DepartmentRepositoryAdapter(DepartmentRepository):
         try:
             session.commit()
             session.refresh(new_department)
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -34,7 +33,6 @@ class DepartmentRepositoryAdapter(DepartmentRepository):
         query = session.query(DepartmentEntity).where(DepartmentEntity.id_department == id_department).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Department not found")
         else:
             department_model_out = DepartmentModelOut(
@@ -44,7 +42,6 @@ class DepartmentRepositoryAdapter(DepartmentRepository):
                 country_id=query.country_id
             )
             session.commit()
-            session.close()
             return department_model_out
 
     @staticmethod
@@ -52,7 +49,6 @@ class DepartmentRepositoryAdapter(DepartmentRepository):
         query = session.query(DepartmentEntity).where(DepartmentEntity.id_department == id_department).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Department not found")
         else:
             if query:
@@ -67,7 +63,6 @@ class DepartmentRepositoryAdapter(DepartmentRepository):
         )
         try:
             session.commit()
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -87,7 +82,6 @@ class DepartmentRepositoryAdapter(DepartmentRepository):
             for q in query
         ]
         session.commit()
-        session.close()
         return departments_model_out_list
 
     @staticmethod
@@ -95,11 +89,9 @@ class DepartmentRepositoryAdapter(DepartmentRepository):
         query = session.query(DepartmentEntity).where(DepartmentEntity.id_department == id_department).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Department not found")
         else:
             if query:
                 session.delete(query)
             session.commit()
-            session.close()
         return None
