@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import List
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
@@ -7,8 +8,7 @@ from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (U
                                                                                AuthenticationEntity)
 
 
-class UserRepositoryAdapter(UserRepository):
-
+class UserRepositoryAdapter(UserRepository, ABC):
     @staticmethod
     async def add_user(user: UserModelIn) -> UserModelOut:
         new_user = UserEntity(name_user=user.name_user, lastname_user=user.lastname_user, email_user=user.email_user,
@@ -19,7 +19,6 @@ class UserRepositoryAdapter(UserRepository):
         try:
             session.commit()
             session.refresh(new_user)
-            session.close()
         except IntegrityError as e:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -43,7 +42,6 @@ class UserRepositoryAdapter(UserRepository):
         query = session.query(UserEntity).where(UserEntity.id_user == id_user).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="User not found")
         else:
             user_model_out = UserModelOut(
@@ -59,7 +57,6 @@ class UserRepositoryAdapter(UserRepository):
                 municipality_id=query.municipality_id
             )
             session.commit()
-            session.close()
             return user_model_out
 
     @staticmethod
@@ -67,7 +64,6 @@ class UserRepositoryAdapter(UserRepository):
         query = session.query(UserEntity).where(UserEntity.id_user == id_user).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="User not found")
         else:
             if query:
@@ -88,7 +84,6 @@ class UserRepositoryAdapter(UserRepository):
         )
         try:
             session.commit()
-            session.close()
         except IntegrityError as e:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -114,7 +109,6 @@ class UserRepositoryAdapter(UserRepository):
             for q in query
         ]
         session.commit()
-        session.close()
         return users_model_out_list
 
     @staticmethod
@@ -122,13 +116,11 @@ class UserRepositoryAdapter(UserRepository):
         query = session.query(UserEntity).where(UserEntity.id_user == id_user).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="User not found")
         else:
             if query:
                 session.delete(query)
             session.commit()
-            session.close()
         return None
 
     @staticmethod
@@ -140,28 +132,26 @@ class UserRepositoryAdapter(UserRepository):
         )
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Harvest not found or empty Crops")
         else:
             result = [
                 UserModelOut2(
-                    id_user=UserEntity.id_user,
-                    name_user=UserEntity.name_user,
-                    lastname_user=UserEntity.lastname_user,
-                    phone_user=UserEntity.phone_user,
-                    email_user=UserEntity.email_user,
-                    id_document_user=UserEntity.id_document_user,
-                    birthdate_user=UserEntity.birthdate_user,
-                    type_document_id=UserEntity.type_document_id,
-                    gender_id=UserEntity.gender_id,
-                    municipality_id=UserEntity.municipality_id,
-                    name_gender=GenderEntity.name_gender,
-                    code_gender=GenderEntity.code_gender
+                    id_user=user_entity.id_user,
+                    name_user=user_entity.name_user,
+                    lastname_user=user_entity.lastname_user,
+                    phone_user=user_entity.phone_user,
+                    email_user=user_entity.email_user,
+                    id_document_user=user_entity.id_document_user,
+                    birthdate_user=user_entity.birthdate_user,
+                    type_document_id=user_entity.type_document_id,
+                    gender_id=user_entity.gender_id,
+                    municipality_id=user_entity.municipality_id,
+                    name_gender=gender_entity.name_gender,
+                    code_gender=gender_entity.code_gender
                 )
-                for UserEntity, GenderEntity, auth in query
+                for user_entity, gender_entity, auth in query
             ]
             session.commit()
-            session.close()
             return result
 
     @staticmethod
@@ -172,7 +162,6 @@ class UserRepositoryAdapter(UserRepository):
         )
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Harvest not found or empty Crops")
         else:
             users_model_out_list = [
@@ -191,7 +180,6 @@ class UserRepositoryAdapter(UserRepository):
                 for q, auth in query
             ]
             session.commit()
-            session.close()
             return users_model_out_list
 
     @staticmethod
