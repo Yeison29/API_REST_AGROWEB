@@ -28,7 +28,6 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
         session.add(new_auth)
         session.commit()
         session.refresh(new_auth)
-        session.close()
         auth_model_out = AuthenticationModelOut(
             id_auth=new_auth.id_auth,
             auth_email_user=new_auth.email_user_auth,
@@ -41,7 +40,8 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
 
     @staticmethod
     async def get_auth_by_email(email_user: str) -> AuthenticationModelOutToken:
-        #query = session.query(AuthenticationEntity).join(UserEntity).filter(AuthenticationEntity.email_user_auth == email_user).first()
+        query = session.query(AuthenticationEntity).join(UserEntity).filter(
+            AuthenticationEntity.email_user_auth == email_user).first()
         stmt = (
             select(AuthenticationEntity, UserEntity.name_user)
             .join(UserEntity, AuthenticationEntity.user_id == UserEntity.id_user)
@@ -50,7 +50,6 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
         query = session.execute(stmt).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=401, detail="Could not validate credentials",
                                 headers={"WWW-Authenticate": "Bearer"})
         else:
@@ -64,7 +63,6 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
                 name_user=query.name_user
             )
             session.commit()
-            session.close()
             return auth_model_out
 
     @staticmethod
@@ -72,7 +70,6 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
         query = session.query(AuthenticationEntity).where(AuthenticationEntity.user_id == id_user).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Authentication not found")
         else:
             if hasattr(query, 'email_user_auth'):
@@ -88,7 +85,6 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
         )
         try:
             session.commit()
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -138,7 +134,7 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
                                                           ).first()
         if not query:
             session.commit()
-            session.close()
+            
             raise HTTPException(status_code=404, detail="Code error")
         else:
             if hasattr(query, 'disabled_auth'):
@@ -147,7 +143,6 @@ class AuthenticationRepositoryAdapter(AuthenticationRepository):
 
         try:
             session.commit()
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
