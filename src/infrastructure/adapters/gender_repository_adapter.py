@@ -15,7 +15,6 @@ class GenderRepositoryAdapter(GenderRepository):
         try:
             session.commit()
             session.refresh(new_gender)
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -32,7 +31,6 @@ class GenderRepositoryAdapter(GenderRepository):
         query = session.query(GenderEntity).where(GenderEntity.id_gender == id_gender).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Gender not found")
         else:
             gender_model_out = GenderModelOut(
@@ -41,7 +39,6 @@ class GenderRepositoryAdapter(GenderRepository):
                 code_gender=query.code_gender
             )
             session.commit()
-            session.close()
             return gender_model_out
 
     @staticmethod
@@ -49,7 +46,6 @@ class GenderRepositoryAdapter(GenderRepository):
         query = session.query(GenderEntity).where(GenderEntity.id_gender == id_gender).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Gender not found")
         else:
             if query:
@@ -63,7 +59,6 @@ class GenderRepositoryAdapter(GenderRepository):
         )
         try:
             session.commit()
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -82,7 +77,6 @@ class GenderRepositoryAdapter(GenderRepository):
             for q in query
         ]
         session.commit()
-        session.close()
         return genders_model_out_list
 
     @staticmethod
@@ -90,11 +84,9 @@ class GenderRepositoryAdapter(GenderRepository):
         query = session.query(GenderEntity).where(GenderEntity.id_gender == id_gender).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Gender not found")
         else:
             if query:
                 session.delete(query)
             session.commit()
-            session.close()
         return None
