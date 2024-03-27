@@ -5,7 +5,6 @@ from src.domain.repositories.crop_repository import (CropRepository, CropModelIn
 from src.infrastructure.adapters.data_sources.db_config import session, func
 from src.infrastructure.adapters.data_sources.entities.agro_web_entity import (CropEntity, UserEntity,
                                                                                MunicipalityEntity, HarvestEntity)
-import pandas as pd
 
 
 class CropRepositoryAdapter(CropRepository):
@@ -18,7 +17,6 @@ class CropRepositoryAdapter(CropRepository):
         session.add(new_crop)
         session.commit()
         session.refresh(new_crop)
-        session.close()
         crop_model_out = CropModelOut(
             id_crop=new_crop.id_crop,
             hectares=new_crop.hectares,
@@ -40,7 +38,6 @@ class CropRepositoryAdapter(CropRepository):
         )
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Crop not found")
         else:
             crop_model_out = CropModelOut2(
@@ -57,7 +54,6 @@ class CropRepositoryAdapter(CropRepository):
                 id_harvest=query.HarvestEntity.id_harvest
             )
             session.commit()
-            session.close()
             return crop_model_out
 
     @staticmethod
@@ -65,7 +61,6 @@ class CropRepositoryAdapter(CropRepository):
         query = session.query(CropEntity).where(CropEntity.id_crop == id_crop).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Crop not found")
         else:
             if query:
@@ -83,7 +78,6 @@ class CropRepositoryAdapter(CropRepository):
             user_id=crop.user_id
         )
         session.commit()
-        session.close()
         return crop_model_out
 
     @staticmethod
@@ -93,24 +87,8 @@ class CropRepositoryAdapter(CropRepository):
             .join(HarvestEntity, HarvestEntity.id_harvest == CropEntity.harvest_id)
             .where(CropEntity.user_id == user_id).all()
         )
-        crops_model_out_list = [
-            CropModelOut2(
-                id_crop=q.id_crop,
-                hectares=q.hectares,
-                seed_time=q.seed_time,
-                approximate_durability_date=q.approximate_durability_date,
-                approximate_weeks_crop_durability=q.approximate_weeks_crop_durability,
-                activate=q.activate,
-                harvest_id=q.harvest_id,
-                user_id=q.user_id,
-                name_harvest=h.name_harvest,
-                code_harvest=h.code_harvest,
-                id_harvest=h.id_harvest
-            )
-            for q, h in query
-        ]
+        crops_model_out_list = CropRepositoryAdapter.crops_model_out_list(query)
         session.commit()
-        session.close()
         return crops_model_out_list
 
     @staticmethod
@@ -118,13 +96,13 @@ class CropRepositoryAdapter(CropRepository):
         query = session.query(CropEntity).where(CropEntity.id_crop == id_crop).first()
         if not query:
             session.commit()
-            session.close()
+            
             raise HTTPException(status_code=404, detail="Crop not found")
         else:
             if query:
                 session.delete(query)
             session.commit()
-            session.close()
+            
         return None
 
     @staticmethod
@@ -132,7 +110,7 @@ class CropRepositoryAdapter(CropRepository):
         query = session.query(CropEntity).where(CropEntity.harvest_id == harvest_id, CropEntity.activate).all()
         if not query:
             session.commit()
-            session.close()
+            
             raise HTTPException(status_code=404, detail="Harvest not found or empty Crops")
         else:
             crops_model_out_list = [
@@ -149,13 +127,13 @@ class CropRepositoryAdapter(CropRepository):
                 for q in query
             ]
             session.commit()
-            session.close()
+            
             return crops_model_out_list
 
     @staticmethod
     async def get_all_crops_past() -> List[MunicipalityProductionModelOut]:
         query = (
-            session.query(CropEntity, UserEntity, MunicipalityEntity, HarvestEntity)
+            session.query(CropEntity, MunicipalityEntity, HarvestEntity)
             .join(UserEntity, CropEntity.user_id == UserEntity.id_user)
             .join(MunicipalityEntity, UserEntity.municipality_id == MunicipalityEntity.id_municipality)
             .join(HarvestEntity, CropEntity.harvest_id == HarvestEntity.id_harvest)
@@ -164,23 +142,22 @@ class CropRepositoryAdapter(CropRepository):
         )
         if not query:
             session.commit()
-            session.close()
+            
             raise HTTPException(status_code=404, detail="Harvest not found or empty Crops")
         else:
             result = [
                 MunicipalityProductionModelOut(
-                    name_municipality=MunicipalityEntity.name_municipality,
-                    municipality_id=MunicipalityEntity.id_municipality,
-                    code_municipality=MunicipalityEntity.code_municipality,
-                    harvest_id=HarvestEntity.id_harvest,
-                    code_harvest=HarvestEntity.code_harvest,
-                    name_harvest=HarvestEntity.name_harvest,
-                    total_hectares=CropEntity.hectares
+                    name_municipality=municipality_entity.name_municipality,
+                    municipality_id=municipality_entity.id_municipality,
+                    code_municipality=municipality_entity.code_municipality,
+                    harvest_id=harvest_entity.id_harvest,
+                    code_harvest=harvest_entity.code_harvest,
+                    name_harvest=harvest_entity.name_harvest,
+                    total_hectares=crop_entity.hectares
                 )
-                for CropEntity, UserEntity, MunicipalityEntity, HarvestEntity in query
+                for crop_entity, municipality_entity, harvest_entity in query
             ]
             session.commit()
-            session.close()
             return result
 
     @staticmethod
@@ -193,27 +170,11 @@ class CropRepositoryAdapter(CropRepository):
         )
         if not query:
             session.commit()
-            session.close()
+            
             raise HTTPException(status_code=404, detail="Harvest not found or empty Crops")
         else:
-            result = [
-                CropModelOut2(
-                    id_crop=CropEntity.id_crop,
-                    hectares=CropEntity.hectares,
-                    seed_time=CropEntity.seed_time,
-                    approximate_durability_date=CropEntity.approximate_durability_date,
-                    approximate_weeks_crop_durability=CropEntity.approximate_weeks_crop_durability,
-                    activate=CropEntity.activate,
-                    harvest_id=CropEntity.harvest_id,
-                    user_id=CropEntity.user_id,
-                    name_harvest=HarvestEntity.name_harvest,
-                    code_harvest=HarvestEntity.code_harvest,
-                    id_harvest=HarvestEntity.id_harvest
-                )
-                for CropEntity, HarvestEntity in query
-            ]
+            result = CropRepositoryAdapter.crops_model_out_list(query)
             session.commit()
-            session.close()
             return result
         pass
 
@@ -221,3 +182,22 @@ class CropRepositoryAdapter(CropRepository):
     async def count_hectares() -> int:
         count_hectares = session.query(func.sum(CropEntity.hectares)).scalar()
         return count_hectares
+
+    @staticmethod
+    def crops_model_out_list(query: any) -> List[CropModelOut2]:
+        return [
+                CropModelOut2(
+                    id_crop=crop_entity.id_crop,
+                    hectares=crop_entity.hectares,
+                    seed_time=crop_entity.seed_time,
+                    approximate_durability_date=crop_entity.approximate_durability_date,
+                    approximate_weeks_crop_durability=crop_entity.approximate_weeks_crop_durability,
+                    activate=crop_entity.activate,
+                    harvest_id=crop_entity.harvest_id,
+                    user_id=crop_entity.user_id,
+                    name_harvest=harvest_entity.name_harvest,
+                    code_harvest=harvest_entity.code_harvest,
+                    id_harvest=harvest_entity.id_harvest
+                )
+                for crop_entity, harvest_entity in query
+            ]
