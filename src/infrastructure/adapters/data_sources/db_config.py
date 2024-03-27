@@ -33,14 +33,14 @@ def update_weeks_crops():
     update_query = (session.query(agro_web_entity.CropEntity).
                     filter(((func.extract('week', agro_web_entity.
                                           CropEntity.approximate_durability_date) + agro_web_entity.
-                           CropEntity.approximate_weeks_crop_durability - 1 < func.
-                           extract('week', func.current_date())) & (func.current_date() >=
-                                                                    (agro_web_entity.CropEntity.
-                                                                     approximate_durability_date + func.make_interval
-                                                                    (weeks=agro_web_entity.CropEntity.
-                                                                     approximate_weeks_crop_durability))))
+                             CropEntity.approximate_weeks_crop_durability - 1 < func.
+                             extract('week', func.current_date())) & (func.current_date() >=
+                                                                      (agro_web_entity.CropEntity.
+                                                                       approximate_durability_date + func.make_interval
+                                                                       (weeks=agro_web_entity.CropEntity.
+                                                                        approximate_weeks_crop_durability))))
                            | ((func.extract('year', func.current_date()) >
-                              func.extract('year', agro_web_entity.CropEntity.approximate_durability_date)) &
+                               func.extract('year', agro_web_entity.CropEntity.approximate_durability_date)) &
                               (func.extract('week', agro_web_entity.
                                             CropEntity.approximate_durability_date) + agro_web_entity.
                                CropEntity.approximate_weeks_crop_durability - 53 < func.
