@@ -15,7 +15,6 @@ class HarvestRepositoryAdapter(HarvestRepository):
         try:
             session.commit()
             session.refresh(new_harvest)
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -32,7 +31,6 @@ class HarvestRepositoryAdapter(HarvestRepository):
         query = session.query(HarvestEntity).where(HarvestEntity.id_harvest == id_harvest).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Harvest not found")
         else:
             harvest_model_out = HarvestModelOut(
@@ -41,7 +39,6 @@ class HarvestRepositoryAdapter(HarvestRepository):
                 code_harvest=query.code_harvest
             )
             session.commit()
-            session.close()
             return harvest_model_out
 
     @staticmethod
@@ -49,7 +46,6 @@ class HarvestRepositoryAdapter(HarvestRepository):
         query = session.query(HarvestEntity).where(HarvestEntity.id_harvest == id_harvest).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Harvest not found")
         else:
             if query:
@@ -63,7 +59,6 @@ class HarvestRepositoryAdapter(HarvestRepository):
         )
         try:
             session.commit()
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -82,7 +77,6 @@ class HarvestRepositoryAdapter(HarvestRepository):
             for q in query
         ]
         session.commit()
-        session.close()
         return harvests_model_out_list
 
     @staticmethod
@@ -90,13 +84,11 @@ class HarvestRepositoryAdapter(HarvestRepository):
         query = session.query(HarvestEntity).where(HarvestEntity.id_harvest == id_harvest).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Harvest not found")
         else:
             if query:
                 session.delete(query)
             session.commit()
-            session.close()
         return None
 
     @staticmethod

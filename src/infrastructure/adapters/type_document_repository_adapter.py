@@ -17,7 +17,6 @@ class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
         try:
             session.commit()
             session.refresh(new_type_document)
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -35,7 +34,6 @@ class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
         query = session.query(TypeDocumentEntity).where(TypeDocumentEntity.id_type_document == id_type_document).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Type Document not found")
         else:
             type_document_model_out = TypeDocumentModelOut(
@@ -44,7 +42,6 @@ class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
                 code_type_document=query.code_type_docuemnt
             )
             session.commit()
-            session.close()
             return type_document_model_out
 
     @staticmethod
@@ -52,7 +49,6 @@ class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
         query = session.query(TypeDocumentEntity).where(TypeDocumentEntity.id_type_document == id_type_document).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Type Document not found")
         else:
             if query:
@@ -66,7 +62,6 @@ class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
         )
         try:
             session.commit()
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -86,7 +81,6 @@ class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
             for q in query
         ]
         session.commit()
-        session.close()
         return type_documents_model_out_list
 
     @staticmethod
@@ -94,11 +88,9 @@ class TypeDocumentRepositoryAdapter(TypeDocumentRepository):
         query = session.query(TypeDocumentEntity).where(TypeDocumentEntity.id_type_document == id_type_document).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Type Document not found")
         else:
             if query:
                 session.delete(query)
             session.commit()
-            session.close()
         return None

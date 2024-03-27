@@ -18,7 +18,6 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
         try:
             session.commit()
             session.refresh(new_municipality)
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -36,7 +35,6 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
         query = session.query(MunicipalityEntity).where(MunicipalityEntity.id_municipality == id_municipality).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Municipality not found")
         else:
             municipality_model_out = MunicipalityModelOut(
@@ -46,7 +44,6 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
                 department_id=query.department_id
             )
             session.commit()
-            session.close()
             return municipality_model_out
 
     @staticmethod
@@ -54,7 +51,6 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
         query = session.query(MunicipalityEntity).where(MunicipalityEntity.id_municipality == id_municipality).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Municipality not found")
         else:
             if query:
@@ -69,7 +65,6 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
         )
         try:
             session.commit()
-            session.close()
         except IntegrityError:
             session.rollback()
             raise HTTPException(status_code=400,
@@ -90,7 +85,6 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
             for q in query
         ]
         session.commit()
-        session.close()
         return municipalities_model_out_list
 
     @staticmethod
@@ -98,13 +92,11 @@ class MunicipalityRepositoryAdapter(MunicipalityRepository):
         query = session.query(MunicipalityEntity).where(MunicipalityEntity.id_municipality == id_municipality).first()
         if not query:
             session.commit()
-            session.close()
             raise HTTPException(status_code=404, detail="Municipality not found")
         else:
             if query:
                 session.delete(query)
             session.commit()
-            session.close()
         return None
 
     @staticmethod
